@@ -18,6 +18,12 @@ app.post('/lineage', function(req, res){
   res.send('ok');
 }) 
 
+app.post('/api/v1/lineage', function(req, res){
+  console.log("Received at /api/v1/lineage endpoint");
+  console.log(req.body);
+  res.send('ok');
+}) 
+
 app.listen(3000, function() {
   console.log("Server is now running on port 3000");
 });
