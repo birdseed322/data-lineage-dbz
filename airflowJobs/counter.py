@@ -25,7 +25,7 @@ dag = DAG(
 
 t1 = PostgresOperator(
     task_id='if_not_exists',
-    postgres_conn_id='example_db',
+    postgres_conn_id='postgres_default',
     sql='''
     CREATE TABLE IF NOT EXISTS counts (
       value INTEGER
@@ -35,7 +35,7 @@ t1 = PostgresOperator(
 
 t2 = PostgresOperator(
     task_id='inc',
-    postgres_conn_id='example_db',
+    postgres_conn_id='postgres_default',
     sql='''
     INSERT INTO counts (value)
          VALUES (%(value)s)
