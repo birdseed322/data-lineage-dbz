@@ -1,5 +1,3 @@
-import random
-
 from airflow import DAG
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.utils.dates import days_ago
@@ -14,33 +12,32 @@ default_args = {
 }
 
 dag = DAG(
-    'counter',
-    schedule_interval='*/1 * * * *',
+    'sum',
+    schedule_interval='*/5 * * * *',
     catchup=False,
     is_paused_upon_creation=False,
     max_active_runs=1,
     default_args=default_args,
-    description='DAG that generates a new count value between 1-10.'
+    description='DAG that sums the total of generated count values.'
 )
 
 t1 = PostgresOperator(
     task_id='if_not_exists',
+    postgres_conn_id='postgres_default',
     sql='''
-    CREATE TABLE IF NOT EXISTS counts (
+    CREATE TABLE IF NOT EXISTS sums (
       value INTEGER
     );''',
     dag=dag
 )
 
 t2 = PostgresOperator(
-    task_id='inc',
+    task_id='total',
+    postgres_conn_id='postgres_default',
     sql='''
-    INSERT INTO counts (value)
-         VALUES (%(value)s)
+    INSERT INTO sums (value)
+        SELECT SUM(c.value) FROM counts AS c;
     ''',
-    parameters={
-      'value': random.randint(1, 10)
-    },
     dag=dag
 )
 
