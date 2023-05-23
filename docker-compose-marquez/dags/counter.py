@@ -38,11 +38,8 @@ t2 = PostgresOperator(
     postgres_conn_id='postgres_default',
     sql='''
     INSERT INTO counts (value)
-         VALUES (%(value)s)
+         VALUES (5)
     ''',
-    parameters={
-      'value': random.randint(1, 10)
-    },
     dag=dag
 )
 

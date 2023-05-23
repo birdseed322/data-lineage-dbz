@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 #
 # Copyright 2018-2023 contributors to the Marquez project
 # SPDX-License-Identifier: Apache-2.0
