@@ -17,10 +17,10 @@ function lineageCreation(parentDagId, nextTaskIds, waitForCompletion) {
       Authorization: "Basic " + btoa(airflow_user + ":" + airflow_password),
     },
   }).then((result) => {
-    result.json().then((tasks) => {
+    result.json().then((dag) => {
       //loop through each task
-      tasks.tasks.forEach((task) => {
-        //Create all nodes
+      dag.tasks.forEach((task) => {
+        //Create all nodes 
         //Call to marquez
         //Attain upstream (airflow.task.upstream_task_ids). If upstream empty push to root
         if (waitForCompletion && !task.downstream_task_ids[0]) {
@@ -28,12 +28,12 @@ function lineageCreation(parentDagId, nextTaskIds, waitForCompletion) {
         }
       });
 
-      tasks.tasks.forEach((task) => {
+      dag.tasks.forEach((task) => { // to create downstream links
         if (task.operator_name == "TriggerDagRunOperator") {
           console.log(task);
           fetch(
             marquez_backend +
-              "namespaces/example/jobs/" +
+              "namespaces/example/jobs/" + //"example" to be replaced
               parentDagId +
               "." +
               task.task_id
@@ -51,23 +51,35 @@ function lineageCreation(parentDagId, nextTaskIds, waitForCompletion) {
 
             });
           });
+        } else {
+          task.downstream_task_ids.forEach((downstreamTask) => {
+            //create link with downstream task
+          })
         }
-        // if (task.downstream_task_ids[0]) {
-        //   //Create link to downstream node
-
-        //   console.log(task.task_id + " has something");
-        // } else {
-
-        //   console.log("Theres nothing");
-        // }
       });
     });
   });
+  return roots;
 }
+
+function createAirflowJob() {
+  app.post("/test", function(req,res) {
+    console.log('post request working');
+  }) 
+};
+
+app.get("/test", function(req, res) {
+  createAirflowJob(); //not running, need a curl function?
+  res.send("created airflow job"); 
+});
+
+app.post("/test", function(req,res) {
+  console.log('post request working');
+});
 
 async function checkNode(taskId) {
   //fetch to backend to check if taskId exists
-}
+};
 
 app.get("/", function (req, res) {
   res.send("Hello World");
