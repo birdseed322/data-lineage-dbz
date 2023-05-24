@@ -141,3 +141,17 @@
 2023-05-22 10:17:21.497+0000 INFO  Neo4j Server shutdown initiated by request
 2023-05-22 10:17:21.516+0000 INFO  Stopping...
 2023-05-22 10:17:27.852+0000 INFO  Stopped.
+2023-05-23 01:54:23.013+0000 WARN  Use of deprecated setting 'dbms.memory.pagecache.size'. It is replaced by 'server.memory.pagecache.size'.
+2023-05-23 01:54:23.022+0000 WARN  Use of deprecated setting 'dbms.memory.heap.max_size'. It is replaced by 'server.memory.heap.max_size'.
+2023-05-23 01:54:23.027+0000 INFO  Starting...
+2023-05-23 01:54:24.109+0000 INFO  This instance is ServerId{ea0819c0} (ea0819c0-f25f-4e4f-8679-d6363b93bb40)
+2023-05-23 01:54:25.508+0000 INFO  ======== Neo4j 5.7.0 ========
+2023-05-23 01:54:32.243+0000 INFO  Bolt enabled on 0.0.0.0:7687.
+2023-05-23 01:54:33.338+0000 INFO  Remote interface available at http://localhost:7474/
+2023-05-23 01:54:33.343+0000 INFO  id: 23517D66786BC361D80613C48F1437BB51BB5BE8B60290E02CA98F0E0DA0C052
+2023-05-23 01:54:33.345+0000 INFO  name: system
+2023-05-23 01:54:33.347+0000 INFO  creationDate: 2023-05-19T03:13:17.827Z
+2023-05-23 01:54:33.349+0000 INFO  Started.
+2023-05-23 08:22:50.919+0000 INFO  Neo4j Server shutdown initiated by request
+2023-05-23 08:22:50.949+0000 INFO  Stopping...
+2023-05-23 08:22:57.948+0000 INFO  Stopped.
