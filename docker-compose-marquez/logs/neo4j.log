@@ -166,3 +166,32 @@
 2023-05-24 01:42:50.855+0000 INFO  name: system
 2023-05-24 01:42:50.857+0000 INFO  creationDate: 2023-05-19T03:13:17.827Z
 2023-05-24 01:42:50.859+0000 INFO  Started.
+2023-05-24 06:33:13.232+0000 WARN  Unsupported authentication token, missing key `credentials`
+2023-05-24 06:36:10.875+0000 WARN  Unsupported authentication token, missing key `credentials`
+2023-05-24 06:38:18.881+0000 WARN  Unsupported authentication token, missing key `credentials`
+2023-05-24 06:40:52.939+0000 WARN  Unsupported authentication token, missing key `credentials`
+2023-05-24 06:41:32.503+0000 WARN  Unsupported authentication token, missing key `credentials`
+2023-05-24 06:42:20.799+0000 WARN  The client is unauthorized due to authentication failure.
+2023-05-24 06:42:20.830+0000 WARN  The client is unauthorized due to authentication failure.
+2023-05-24 06:42:40.574+0000 WARN  Unsupported authentication token, missing key `credentials`
+2023-05-24 06:43:06.200+0000 WARN  Unsupported authentication token, missing key `credentials`
+2023-05-24 06:54:28.927+0000 ERROR Client triggered an unexpected error [Neo.DatabaseError.Statement.ExecutionFailed]: The given query uses 16 CALL clauses (15 too many). 
+The system database supports a restricted set of Cypher clauses. The supported clause structure for procedure calls is: CALL, YIELD, RETURN. YIELD and RETURN clauses are optional. The order of the clauses is fixed and each can only occur once., reference 96c0a124-8fae-4ff0-91a4-0dfa8410c99e.
+2023-05-24 06:57:09.703+0000 ERROR [bolt-291] Terminating connection due to unexpected error
+org.neo4j.bolt.protocol.error.streaming.BoltStreamingWriteException: Failed to transmit operation result: Response write failure
+	at org.neo4j.bolt.protocol.common.fsm.response.NetworkResponseHandler.onSuccess(NetworkResponseHandler.java:184) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.fsm.AbstractStateMachine.after(AbstractStateMachine.java:112) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.fsm.AbstractStateMachine.process(AbstractStateMachine.java:88) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.connector.connection.AtomicSchedulingConnection.lambda$submit$4(AtomicSchedulingConnection.java:123) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.connector.connection.AtomicSchedulingConnection.executeJob(AtomicSchedulingConnection.java:345) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.connector.connection.AtomicSchedulingConnection.doExecuteJobs(AtomicSchedulingConnection.java:280) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.connector.connection.AtomicSchedulingConnection.executeJobs(AtomicSchedulingConnection.java:222) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) [?:?]
+	at java.util.concurrent.FutureTask.run(FutureTask.java:264) [?:?]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) [?:?]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) [?:?]
+	at java.lang.Thread.run(Thread.java:833) [?:?]
+Caused by: io.netty.channel.StacklessClosedChannelException
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-transport-4.1.89.Final.jar:4.1.89.Final]
+2023-05-24 07:04:36.250+0000 ERROR Client triggered an unexpected error [Neo.DatabaseError.Statement.ExecutionFailed]: The given query uses 16 CALL clauses (15 too many). 
+The system database supports a restricted set of Cypher clauses. The supported clause structure for procedure calls is: CALL, YIELD, RETURN. YIELD and RETURN clauses are optional. The order of the clauses is fixed and each can only occur once., reference ad5536ec-6e7f-4df4-b235-7829f3a3ac9f.

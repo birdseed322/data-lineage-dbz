@@ -8282,3 +8282,244 @@ Caused by: org.neo4j.cypher.internal.parser.javacc.TokenMgrException: Lexical er
 2023-05-24 01:42:50.854+0000 INFO  [o.n.g.f.DatabaseManagementServiceFactory] id: 23517D66786BC361D80613C48F1437BB51BB5BE8B60290E02CA98F0E0DA0C052
 2023-05-24 01:42:50.856+0000 INFO  [o.n.g.f.DatabaseManagementServiceFactory] name: system
 2023-05-24 01:42:50.858+0000 INFO  [o.n.g.f.DatabaseManagementServiceFactory] creationDate: 2023-05-19T03:13:17.827Z
+2023-05-24 05:38:22.866+0000 WARN  [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=8074, gcTime=0, gcCount=0}
+2023-05-24 05:38:23.570+0000 WARN  [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=1077, gcTime=0, gcCount=0}
+2023-05-24 05:38:38.729+0000 WARN  [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=434, gcTime=0, gcCount=0}
+2023-05-24 06:33:13.246+0000 WARN  [o.n.b.p.c.c.c.AtomicSchedulingConnection] Unsupported authentication token, missing key `credentials`
+2023-05-24 06:33:59.387+0000 ERROR [o.n.b.p.c.h.ProtocolHandshakeHandler] Fatal error occurred during protocol handshaking: [id: 0xa312849c, L:/172.20.0.5:7687 - R:/172.20.0.1:37508]
+java.lang.NullPointerException: Cannot read the array length because "array" is null
+	at io.netty.buffer.Unpooled.copiedBuffer(Unpooled.java:363) ~[netty-buffer-4.1.89.Final.jar:4.1.89.Final]
+	at org.neo4j.bolt.protocol.common.handler.DiscoveryResponseHandler.channelRead(DiscoveryResponseHandler.java:58) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444) [netty-transport-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420) [netty-transport-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412) [netty-transport-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.handler.codec.MessageToMessageDecoder.channelRead(MessageToMessageDecoder.java:103) [netty-codec-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444) [netty-transport-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420) [netty-transport-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412) [netty-transport-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.channel.CombinedChannelDuplexHandler$DelegatingChannelHandlerContext.fireChannelRead(CombinedChannelDuplexHandler.java:436) [netty-transport-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:346) [netty-codec-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:318) [netty-codec-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.channel.CombinedChannelDuplexHandler.channelRead(CombinedChannelDuplexHandler.java:251) [netty-transport-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:442) [netty-transport-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420) [netty-transport-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412) [netty-transport-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.handler.codec.ByteToMessageDecoder.handlerRemoved(ByteToMessageDecoder.java:266) [netty-codec-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:536) [netty-codec-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:468) [netty-codec-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:290) [netty-codec-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444) [netty-transport-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420) [netty-transport-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412) [netty-transport-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410) [netty-transport-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:440) [netty-transport-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420) [netty-transport-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919) [netty-transport-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.channel.epoll.AbstractEpollStreamChannel$EpollStreamUnsafe.epollInReady(AbstractEpollStreamChannel.java:800) [netty-transport-classes-epoll-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.channel.epoll.EpollEventLoop.processReady(EpollEventLoop.java:499) [netty-transport-classes-epoll-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.channel.epoll.EpollEventLoop.run(EpollEventLoop.java:397) [netty-transport-classes-epoll-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997) [netty-common-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-common-4.1.89.Final.jar:4.1.89.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-common-4.1.89.Final.jar:4.1.89.Final]
+	at java.lang.Thread.run(Thread.java:833) [?:?]
+2023-05-24 06:36:10.881+0000 WARN  [o.n.b.p.c.c.c.AtomicSchedulingConnection] Unsupported authentication token, missing key `credentials`
+2023-05-24 06:38:18.883+0000 WARN  [o.n.b.p.c.c.c.AtomicSchedulingConnection] Unsupported authentication token, missing key `credentials`
+2023-05-24 06:40:52.942+0000 WARN  [o.n.b.p.c.c.c.AtomicSchedulingConnection] Unsupported authentication token, missing key `credentials`
+2023-05-24 06:41:32.505+0000 WARN  [o.n.b.p.c.c.c.AtomicSchedulingConnection] Unsupported authentication token, missing key `credentials`
+2023-05-24 06:42:20.800+0000 WARN  [o.n.b.p.c.c.c.AtomicSchedulingConnection] The client is unauthorized due to authentication failure.
+2023-05-24 06:42:20.832+0000 WARN  [o.n.b.p.c.c.c.AtomicSchedulingConnection] The client is unauthorized due to authentication failure.
+2023-05-24 06:42:40.577+0000 WARN  [o.n.b.p.c.c.c.AtomicSchedulingConnection] Unsupported authentication token, missing key `credentials`
+2023-05-24 06:43:06.202+0000 WARN  [o.n.b.p.c.c.c.AtomicSchedulingConnection] Unsupported authentication token, missing key `credentials`
+2023-05-24 06:49:00.617+0000 INFO  [o.n.k.i.t.l.c.CheckPointerImpl] [neo4j/3dcce7f6] Checkpoint triggered by "Scheduled checkpoint for every 15 minutes threshold" @ txId: 23 checkpoint started...
+2023-05-24 06:49:00.775+0000 INFO  [o.n.k.i.t.l.c.CheckPointerImpl] [neo4j/3dcce7f6] Checkpoint triggered by "Scheduled checkpoint for every 15 minutes threshold" @ txId: 23 checkpoint completed in 156ms. Checkpoint flushed 39 pages (0% of total available pages), in 39 IOs. Checkpoint performed with IO limit: unlimited, paused in total 0 times( 0 millis).
+2023-05-24 06:49:00.777+0000 INFO  [o.n.k.i.t.l.p.LogPruningImpl] [neo4j/3dcce7f6] No log version pruned. The strategy used was '104857600 size'. 
+2023-05-24 06:54:28.930+0000 ERROR [o.n.b.p.c.f.StateMachineSPIImpl] Client triggered an unexpected error [Neo.DatabaseError.Statement.ExecutionFailed]: The given query uses 16 CALL clauses (15 too many). 
+The system database supports a restricted set of Cypher clauses. The supported clause structure for procedure calls is: CALL, YIELD, RETURN. YIELD and RETURN clauses are optional. The order of the clauses is fixed and each can only occur once., reference 96c0a124-8fae-4ff0-91a4-0dfa8410c99e.
+2023-05-24 06:54:28.931+0000 ERROR [o.n.b.p.c.f.StateMachineSPIImpl] Client triggered an unexpected error [Neo.DatabaseError.Statement.ExecutionFailed]: The given query uses 16 CALL clauses (15 too many). 
+The system database supports a restricted set of Cypher clauses. The supported clause structure for procedure calls is: CALL, YIELD, RETURN. YIELD and RETURN clauses are optional. The order of the clauses is fixed and each can only occur once., reference 96c0a124-8fae-4ff0-91a4-0dfa8410c99e.
+org.neo4j.fabric.executor.FabricException: The given query uses 16 CALL clauses (15 too many). 
+The system database supports a restricted set of Cypher clauses. The supported clause structure for procedure calls is: CALL, YIELD, RETURN. YIELD and RETURN clauses are optional. The order of the clauses is fixed and each can only occur once.
+	at org.neo4j.fabric.executor.Exceptions.transform(Exceptions.java:56) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.executor.Exceptions.transform(Exceptions.java:32) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.transaction.FabricTransactionImpl.execute(FabricTransactionImpl.java:359) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.executor.FabricExecutor.run(FabricExecutor.java:147) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.bolt.BoltFabricDatabaseService$BoltTransactionImpl.executeQuery(BoltFabricDatabaseService.java:175) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.tx.TransactionImpl.run(TransactionImpl.java:118) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.v40.fsm.state.InTransactionState.processRunMessage(InTransactionState.java:70) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.v40.fsm.state.InTransactionState.processUnsafe(InTransactionState.java:50) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.fsm.state.AbstractState.process(AbstractState.java:41) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.fsm.AbstractStateMachine.nextState(AbstractStateMachine.java:125) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.fsm.AbstractStateMachine.process(AbstractStateMachine.java:85) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.connector.connection.AtomicSchedulingConnection.lambda$submit$4(AtomicSchedulingConnection.java:123) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.connector.connection.AtomicSchedulingConnection.executeJob(AtomicSchedulingConnection.java:345) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.connector.connection.AtomicSchedulingConnection.doExecuteJobs(AtomicSchedulingConnection.java:315) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.connector.connection.AtomicSchedulingConnection.executeJobs(AtomicSchedulingConnection.java:222) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) [?:?]
+	at java.util.concurrent.FutureTask.run(FutureTask.java:264) [?:?]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) [?:?]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) [?:?]
+	at java.lang.Thread.run(Thread.java:833) [?:?]
+Caused by: java.lang.RuntimeException: The given query uses 16 CALL clauses (15 too many). 
+The system database supports a restricted set of Cypher clauses. The supported clause structure for procedure calls is: CALL, YIELD, RETURN. YIELD and RETURN clauses are optional. The order of the clauses is fixed and each can only occur once.
+	at org.neo4j.cypher.internal.compiler.AdministrationCommandPlanBuilder$.process(AdministrationCommandPlanBuilder.scala:1062) ~[neo4j-cypher-planner-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.compiler.AdministrationCommandPlanBuilder$.process(AdministrationCommandPlanBuilder.scala:158) ~[neo4j-cypher-planner-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.frontend.phases.Phase.$anonfun$transform$1(Phase.scala:36) ~[neo4j-front-end-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.frontend.helpers.package$.$anonfun$closing$1(package.scala:25) ~[neo4j-front-end-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.frontend.helpers.package$.using(package.scala:34) ~[neo4j-front-end-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.frontend.helpers.package$.closing(package.scala:25) ~[neo4j-front-end-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.frontend.phases.Phase.transform(Phase.scala:35) ~[neo4j-front-end-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.frontend.phases.Phase.transform$(Phase.scala:33) ~[neo4j-front-end-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.compiler.AdministrationCommandPlanBuilder$.transform(AdministrationCommandPlanBuilder.scala:158) ~[neo4j-cypher-planner-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.frontend.phases.PipeLine.transform(Transformer.scala:75) ~[neo4j-front-end-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.frontend.phases.PipeLine.transform(Transformer.scala:74) ~[neo4j-front-end-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.frontend.phases.PipeLine.transform(Transformer.scala:74) ~[neo4j-front-end-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.compiler.CypherPlanner.planPreparedQuery(CypherPlanner.scala:76) ~[neo4j-cypher-planner-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.planning.CypherPlanner.doCreatePlan(CypherPlanner.scala:450) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.planning.CypherPlanner.org$neo4j$cypher$internal$planning$CypherPlanner$$createPlan$1(CypherPlanner.scala:388) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.planning.CypherPlanner$$anon$1.compile(CypherPlanner.scala:400) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.planning.CypherPlanner$$anon$1.compile(CypherPlanner.scala:399) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.QueryCache.$anonfun$compileAndCache$1(QueryCache.scala:259) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.QueryCache.compileOrCompileWithExpressionCodeGenAndCache(QueryCache.scala:294) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.QueryCache.compileAndCache(QueryCache.scala:259) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.QueryCache.computeIfAbsentOrStale(QueryCache.scala:172) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.planning.CypherPlanner.doPlan(CypherPlanner.scala:419) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.planning.CypherPlanner.plan(CypherPlanner.scala:306) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.CypherCurrentCompiler.compile(CypherCurrentCompiler.scala:130) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.LibraryMasterCompiler.compile(MasterCompiler.scala:118) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.ExecutionEngine.$anonfun$compilerWithExpressionCodeGenOption$2(ExecutionEngine.scala:265) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.ExecutionEngine$$anon$1.compile(ExecutionEngine.scala:274) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.ExecutionEngine$$anon$1.compile(ExecutionEngine.scala:268) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.QueryCache.$anonfun$compileAndCache$1(QueryCache.scala:259) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.QueryCache.compileOrCompileWithExpressionCodeGenAndCache(QueryCache.scala:294) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.QueryCache.compileAndCache(QueryCache.scala:259) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.QueryCache.computeIfAbsentOrStale(QueryCache.scala:172) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.ExecutionEngine.getOrCompile(ExecutionEngine.scala:329) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.ExecutionEngine.doExecute(ExecutionEngine.scala:207) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.ExecutionEngine.$anonfun$execute$1(ExecutionEngine.scala:136) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.ExecutionEngine.closing(ExecutionEngine.scala:185) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.ExecutionEngine.execute(ExecutionEngine.scala:126) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.javacompat.ExecutionEngine.executeQuery(ExecutionEngine.java:138) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.executor.FabricKernelTransaction.lambda$execute$0(FabricKernelTransaction.java:102) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.stream.StatementResults.connectVia(StatementResults.java:51) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.executor.FabricKernelTransaction.run(FabricKernelTransaction.java:90) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.executor.FabricLocalExecutor$LocalTransactionContext.run(FabricLocalExecutor.java:93) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.executor.FabricExecutor$FabricStatementExecution.runLocalQueryAt(FabricExecutor.java:402) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.executor.FabricExecutor$FabricStatementExecution.runExec(FabricExecutor.java:337) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.executor.FabricExecutor$FabricStatementExecution.run(FabricExecutor.java:270) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.executor.FabricExecutor$FabricStatementExecution.run(FabricExecutor.java:236) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.executor.FabricExecutor.lambda$run$0(FabricExecutor.java:172) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.transaction.FabricTransactionImpl.execute(FabricTransactionImpl.java:355) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	... 17 more
+2023-05-24 06:57:09.698+0000 WARN  [i.n.c.DefaultChannelPipeline] An exceptionCaught() event was fired, and it reached at the tail of the pipeline. It usually means the last handler in the pipeline did not handle the exception.
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-transport-4.1.89.Final.jar:4.1.89.Final]
+2023-05-24 06:57:09.700+0000 WARN  [i.n.c.DefaultChannelPipeline] An exceptionCaught() event was fired, and it reached at the tail of the pipeline. It usually means the last handler in the pipeline did not handle the exception.
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-transport-4.1.89.Final.jar:4.1.89.Final]
+2023-05-24 06:57:09.708+0000 ERROR [o.n.b.p.c.c.c.AtomicSchedulingConnection] [bolt-291] Terminating connection due to unexpected error
+org.neo4j.bolt.protocol.error.streaming.BoltStreamingWriteException: Failed to transmit operation result: Response write failure
+	at org.neo4j.bolt.protocol.common.fsm.response.NetworkResponseHandler.onSuccess(NetworkResponseHandler.java:184) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.fsm.AbstractStateMachine.after(AbstractStateMachine.java:112) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.fsm.AbstractStateMachine.process(AbstractStateMachine.java:88) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.connector.connection.AtomicSchedulingConnection.lambda$submit$4(AtomicSchedulingConnection.java:123) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.connector.connection.AtomicSchedulingConnection.executeJob(AtomicSchedulingConnection.java:345) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.connector.connection.AtomicSchedulingConnection.doExecuteJobs(AtomicSchedulingConnection.java:280) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.connector.connection.AtomicSchedulingConnection.executeJobs(AtomicSchedulingConnection.java:222) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) [?:?]
+	at java.util.concurrent.FutureTask.run(FutureTask.java:264) [?:?]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) [?:?]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) [?:?]
+	at java.lang.Thread.run(Thread.java:833) [?:?]
+Caused by: io.netty.channel.StacklessClosedChannelException
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-transport-4.1.89.Final.jar:4.1.89.Final]
+2023-05-24 07:04:00.817+0000 INFO  [o.n.k.i.t.l.c.CheckPointerImpl] [neo4j/3dcce7f6] Checkpoint triggered by "Scheduled checkpoint for every 15 minutes threshold" @ txId: 26 checkpoint started...
+2023-05-24 07:04:00.955+0000 INFO  [o.n.k.i.t.l.c.CheckPointerImpl] [neo4j/3dcce7f6] Checkpoint triggered by "Scheduled checkpoint for every 15 minutes threshold" @ txId: 26 checkpoint completed in 135ms. Checkpoint flushed 31 pages (0% of total available pages), in 31 IOs. Checkpoint performed with IO limit: unlimited, paused in total 0 times( 0 millis).
+2023-05-24 07:04:00.956+0000 INFO  [o.n.k.i.t.l.p.LogPruningImpl] [neo4j/3dcce7f6] No log version pruned. The strategy used was '104857600 size'. 
+2023-05-24 07:04:36.251+0000 ERROR [o.n.b.p.c.f.StateMachineSPIImpl] Client triggered an unexpected error [Neo.DatabaseError.Statement.ExecutionFailed]: The given query uses 16 CALL clauses (15 too many). 
+The system database supports a restricted set of Cypher clauses. The supported clause structure for procedure calls is: CALL, YIELD, RETURN. YIELD and RETURN clauses are optional. The order of the clauses is fixed and each can only occur once., reference ad5536ec-6e7f-4df4-b235-7829f3a3ac9f.
+2023-05-24 07:04:36.252+0000 ERROR [o.n.b.p.c.f.StateMachineSPIImpl] Client triggered an unexpected error [Neo.DatabaseError.Statement.ExecutionFailed]: The given query uses 16 CALL clauses (15 too many). 
+The system database supports a restricted set of Cypher clauses. The supported clause structure for procedure calls is: CALL, YIELD, RETURN. YIELD and RETURN clauses are optional. The order of the clauses is fixed and each can only occur once., reference ad5536ec-6e7f-4df4-b235-7829f3a3ac9f.
+org.neo4j.fabric.executor.FabricException: The given query uses 16 CALL clauses (15 too many). 
+The system database supports a restricted set of Cypher clauses. The supported clause structure for procedure calls is: CALL, YIELD, RETURN. YIELD and RETURN clauses are optional. The order of the clauses is fixed and each can only occur once.
+	at org.neo4j.fabric.executor.Exceptions.transform(Exceptions.java:56) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.executor.Exceptions.transform(Exceptions.java:32) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.transaction.FabricTransactionImpl.execute(FabricTransactionImpl.java:359) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.executor.FabricExecutor.run(FabricExecutor.java:147) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.bolt.BoltFabricDatabaseService$BoltTransactionImpl.executeQuery(BoltFabricDatabaseService.java:175) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.tx.TransactionImpl.run(TransactionImpl.java:118) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.v40.fsm.state.InTransactionState.processRunMessage(InTransactionState.java:70) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.v40.fsm.state.InTransactionState.processUnsafe(InTransactionState.java:50) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.fsm.state.AbstractState.process(AbstractState.java:41) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.fsm.AbstractStateMachine.nextState(AbstractStateMachine.java:125) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.fsm.AbstractStateMachine.process(AbstractStateMachine.java:85) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.connector.connection.AtomicSchedulingConnection.lambda$submit$4(AtomicSchedulingConnection.java:123) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.connector.connection.AtomicSchedulingConnection.executeJob(AtomicSchedulingConnection.java:345) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.connector.connection.AtomicSchedulingConnection.doExecuteJobs(AtomicSchedulingConnection.java:315) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at org.neo4j.bolt.protocol.common.connector.connection.AtomicSchedulingConnection.executeJobs(AtomicSchedulingConnection.java:222) ~[neo4j-bolt-5.7.0.jar:5.7.0]
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) [?:?]
+	at java.util.concurrent.FutureTask.run(FutureTask.java:264) [?:?]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) [?:?]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) [?:?]
+	at java.lang.Thread.run(Thread.java:833) [?:?]
+Caused by: java.lang.RuntimeException: The given query uses 16 CALL clauses (15 too many). 
+The system database supports a restricted set of Cypher clauses. The supported clause structure for procedure calls is: CALL, YIELD, RETURN. YIELD and RETURN clauses are optional. The order of the clauses is fixed and each can only occur once.
+	at org.neo4j.cypher.internal.compiler.AdministrationCommandPlanBuilder$.process(AdministrationCommandPlanBuilder.scala:1062) ~[neo4j-cypher-planner-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.compiler.AdministrationCommandPlanBuilder$.process(AdministrationCommandPlanBuilder.scala:158) ~[neo4j-cypher-planner-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.frontend.phases.Phase.$anonfun$transform$1(Phase.scala:36) ~[neo4j-front-end-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.frontend.helpers.package$.$anonfun$closing$1(package.scala:25) ~[neo4j-front-end-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.frontend.helpers.package$.using(package.scala:34) ~[neo4j-front-end-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.frontend.helpers.package$.closing(package.scala:25) ~[neo4j-front-end-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.frontend.phases.Phase.transform(Phase.scala:35) ~[neo4j-front-end-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.frontend.phases.Phase.transform$(Phase.scala:33) ~[neo4j-front-end-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.compiler.AdministrationCommandPlanBuilder$.transform(AdministrationCommandPlanBuilder.scala:158) ~[neo4j-cypher-planner-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.frontend.phases.PipeLine.transform(Transformer.scala:75) ~[neo4j-front-end-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.frontend.phases.PipeLine.transform(Transformer.scala:74) ~[neo4j-front-end-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.frontend.phases.PipeLine.transform(Transformer.scala:74) ~[neo4j-front-end-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.compiler.CypherPlanner.planPreparedQuery(CypherPlanner.scala:76) ~[neo4j-cypher-planner-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.planning.CypherPlanner.doCreatePlan(CypherPlanner.scala:450) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.planning.CypherPlanner.org$neo4j$cypher$internal$planning$CypherPlanner$$createPlan$1(CypherPlanner.scala:388) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.planning.CypherPlanner$$anon$1.compile(CypherPlanner.scala:400) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.planning.CypherPlanner$$anon$1.compile(CypherPlanner.scala:399) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.QueryCache.$anonfun$compileAndCache$1(QueryCache.scala:259) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.QueryCache.compileOrCompileWithExpressionCodeGenAndCache(QueryCache.scala:294) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.QueryCache.compileAndCache(QueryCache.scala:259) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.QueryCache.computeIfAbsentOrStale(QueryCache.scala:172) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.planning.CypherPlanner.doPlan(CypherPlanner.scala:419) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.planning.CypherPlanner.plan(CypherPlanner.scala:306) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.CypherCurrentCompiler.compile(CypherCurrentCompiler.scala:130) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.LibraryMasterCompiler.compile(MasterCompiler.scala:118) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.ExecutionEngine.$anonfun$compilerWithExpressionCodeGenOption$2(ExecutionEngine.scala:265) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.ExecutionEngine$$anon$1.compile(ExecutionEngine.scala:274) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.ExecutionEngine$$anon$1.compile(ExecutionEngine.scala:268) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.QueryCache.$anonfun$compileAndCache$1(QueryCache.scala:259) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.QueryCache.compileOrCompileWithExpressionCodeGenAndCache(QueryCache.scala:294) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.QueryCache.compileAndCache(QueryCache.scala:259) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.QueryCache.computeIfAbsentOrStale(QueryCache.scala:172) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.ExecutionEngine.getOrCompile(ExecutionEngine.scala:329) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.ExecutionEngine.doExecute(ExecutionEngine.scala:207) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.ExecutionEngine.$anonfun$execute$1(ExecutionEngine.scala:136) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.ExecutionEngine.closing(ExecutionEngine.scala:185) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.ExecutionEngine.execute(ExecutionEngine.scala:126) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.cypher.internal.javacompat.ExecutionEngine.executeQuery(ExecutionEngine.java:138) ~[neo4j-cypher-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.executor.FabricKernelTransaction.lambda$execute$0(FabricKernelTransaction.java:102) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.stream.StatementResults.connectVia(StatementResults.java:51) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.executor.FabricKernelTransaction.run(FabricKernelTransaction.java:90) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.executor.FabricLocalExecutor$LocalTransactionContext.run(FabricLocalExecutor.java:93) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.executor.FabricExecutor$FabricStatementExecution.runLocalQueryAt(FabricExecutor.java:402) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.executor.FabricExecutor$FabricStatementExecution.runExec(FabricExecutor.java:337) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.executor.FabricExecutor$FabricStatementExecution.run(FabricExecutor.java:270) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.executor.FabricExecutor$FabricStatementExecution.run(FabricExecutor.java:236) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.executor.FabricExecutor.lambda$run$0(FabricExecutor.java:172) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	at org.neo4j.fabric.transaction.FabricTransactionImpl.execute(FabricTransactionImpl.java:355) ~[neo4j-fabric-5.7.0.jar:5.7.0]
+	... 17 more
+2023-05-24 07:04:53.060+0000 INFO  [o.n.c.i.c.CypherQueryCaches] [neo4j/3dcce7f6] Discarded stale query from the query cache after 1846 seconds. Reason: NodesAllCardinality changed from 171.0 to 10.0, which is a divergence of 0.9415204678362573 which is greater than threshold 0.5088566236096438. Query id: 559.
+2023-05-24 07:04:53.304+0000 INFO  [o.n.c.i.c.CypherQueryCaches] [neo4j/3dcce7f6] Discarded stale query from the query cache after 1846 seconds. Reason: CardinalityByLabelsAndRelationshipType(None,None,None) changed from 253.0 to 3.0, which is a divergence of 0.9881422924901185 which is greater than threshold 0.5088597416770189. Query id: 563.
+2023-05-24 07:19:00.996+0000 INFO  [o.n.k.i.t.l.c.CheckPointerImpl] [neo4j/3dcce7f6] Checkpoint triggered by "Scheduled checkpoint for every 15 minutes threshold" @ txId: 27 checkpoint started...
+2023-05-24 07:19:01.118+0000 INFO  [o.n.k.i.t.l.c.CheckPointerImpl] [neo4j/3dcce7f6] Checkpoint triggered by "Scheduled checkpoint for every 15 minutes threshold" @ txId: 27 checkpoint completed in 120ms. Checkpoint flushed 55 pages (0% of total available pages), in 55 IOs. Checkpoint performed with IO limit: unlimited, paused in total 0 times( 0 millis).
+2023-05-24 07:19:01.119+0000 INFO  [o.n.k.i.t.l.p.LogPruningImpl] [neo4j/3dcce7f6] No log version pruned. The strategy used was '104857600 size'. 
+2023-05-24 07:32:28.344+0000 INFO  [o.n.c.i.c.CypherQueryCaches] [neo4j/3dcce7f6] Discarded stale query from the query cache after 1656 seconds. Reason: NodesAllCardinality changed from 175.0 to 10.0, which is a divergence of 0.9428571428571428 which is greater than threshold 0.5264012408162592. Query id: 867.
+2023-05-24 07:32:49.949+0000 INFO  [o.n.c.i.c.CypherQueryCaches] [neo4j/3dcce7f6] Discarded stale query from the query cache after 2124 seconds. Reason: CardinalityByLabelsAndRelationshipType(None,None,None) changed from 253.0 to 3.0, which is a divergence of 0.9881422924901185 which is greater than threshold 0.48525872355136074. Query id: 901.
+2023-05-24 07:32:51.879+0000 INFO  [o.n.c.i.c.CypherQueryCaches] [neo4j/3dcce7f6] Discarded stale query from the query cache after 2126 seconds. Reason: NodesAllCardinality changed from 175.0 to 10.0, which is a divergence of 0.9428571428571428 which is greater than threshold 0.4850897830771181. Query id: 909.
+2023-05-24 07:34:01.149+0000 INFO  [o.n.k.i.t.l.c.CheckPointerImpl] [neo4j/3dcce7f6] Checkpoint triggered by "Scheduled checkpoint for every 15 minutes threshold" @ txId: 31 checkpoint started...
+2023-05-24 07:34:01.259+0000 INFO  [o.n.k.i.t.l.c.CheckPointerImpl] [neo4j/3dcce7f6] Checkpoint triggered by "Scheduled checkpoint for every 15 minutes threshold" @ txId: 31 checkpoint completed in 107ms. Checkpoint flushed 37 pages (0% of total available pages), in 37 IOs. Checkpoint performed with IO limit: unlimited, paused in total 0 times( 0 millis).
+2023-05-24 07:34:01.259+0000 INFO  [o.n.k.i.t.l.p.LogPruningImpl] [neo4j/3dcce7f6] No log version pruned. The strategy used was '104857600 size'. 
