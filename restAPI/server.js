@@ -62,9 +62,24 @@ function lineageCreation(parentDagId, nextTaskIds, waitForCompletion) {
   return roots;
 }
 
+function createAirflowJob() {
+  app.post("/test", function(req,res) {
+    console.log('post request working');
+  }) 
+};
+
+app.get("/test", function(req, res) {
+  createAirflowJob(); //not running, need a curl function?
+  res.send("created airflow job"); 
+});
+
+app.post("/test", function(req,res) {
+  console.log('post request working');
+});
+
 async function checkNode(taskId) {
   //fetch to backend to check if taskId exists
-}
+};
 
 app.get("/", function (req, res) {
   res.send("Hello World");
