@@ -6,9 +6,13 @@ const airflow_backend = "http://localhost:8080/api/v1/";
 const airflow_user = "airflow";
 const airflow_password = "airflow";
 const neo4jUsername = "neo4j";
-const neo4jPassword = "password"
+const neo4jPassword = "password";
 
 var neo4j = require("neo4j-driver");
+var driver = neo4j.driver(
+  "bolt://localhost",
+  neo4j.auth.basic(neo4jUsername, neo4jPassword)
+);
 
 //Dependencies
 app.use(express.json());
@@ -140,23 +144,23 @@ app.use(express.json());
 //   return roots;
 // }
 
-function runCypher(query, params) {    
-  var driver = neo4j.driver("bolt://localhost", neo4j.auth.basic(neo4jUsername, neo4jPassword));
-  var session = driver.session(); 
-  session
-    .run(query, params)
-    .catch(function(err) {
-      console.log(err);
-    }).finally(() => {
-      session.close();
-      driver.close()
-    });
+function runCypher(query, params) {
+  console.log(query + " FIRED OFF! PARAMS:" + JSON.stringify(params));
+  var session = driver.session();
+  var writeTrx = session.executeWrite(async trx => {
+    var res = await trx.run(query, params);
+    return res;
+  })
+
+  writeTrx.catch((err) => {console.log(err)}).then(() => {session.close()})
 }
 
 //Second draft of algo. Async considered
 function lineageCreation(parentDagId, nextTaskIds, waitForCompletion) {
   var roots = [];
-
+  runCypher("MERGE(:Dag {dagId: $dagIdParam})", {
+    dagIdParam: parentDagId,
+  });   
   return fetch(airflow_backend + "dags/" + parentDagId + "/tasks", {
     headers: {
       Authorization: "Basic " + btoa(airflow_user + ":" + airflow_password),
@@ -165,27 +169,39 @@ function lineageCreation(parentDagId, nextTaskIds, waitForCompletion) {
     .then((result) => result.json())
     .then((dag) => {
       const fetchPromises = [];
-      runCypher('MERGE(:Dag {dagId: $dagIdParam})', {dagIdParam: parentDagId});
-      dag.tasks.forEach((task) => {   
+      dag.tasks.forEach((task) => {
+        //rename
+        task.downstream_task_ids.forEach(
+          (x, index) =>
+            (task.downstream_task_ids[index] = parentDagId + "." + x)
+        );
         //Create nodes
-        console.log(parentDagId + "." + task.task_id + " Created")
-        runCypher('MATCH (parentDag:Dag{dagId:$dagIdParam}) MERGE (parentDag)-[:is_parent_of]->(job:Job{taskId:$taskIdParam})', {taskIdParam:parentDagId + "." + task.task_id, dagIdParam: parentDagId})
+        runCypher(
+          "MATCH (parentDag:Dag{dagId:$dagIdParam}) MERGE (parentDag)-[:is_parent_of]->(job:Job{taskId:$taskIdParam})",
+          {
+            taskIdParam: parentDagId + "." + task.task_id,
+            dagIdParam: parentDagId,
+          }
+        );
         if (
           waitForCompletion &&
           task.downstream_task_ids.length == 0 &&
           nextTaskIds != null
         ) {
-          //Create link in neo4j with nextTaskIds (Might need to loop)
-          nextTaskIds.forEach((nextTaskId) => {
-            console.log(parentDagId + "." + task.task_id + " -> " + nextTaskId);
-            runCypher('MATCH (downstream_task:Job{taskId:$downstreamTaskIdParam}), (next_task:Job{taskId:$nextTaskIdParam}) MERGE (downstream_task)-[:activates]->(next_task)', {downstreamTaskIdParam:parentDagId + "." + task.task_id, nextTaskIdParam: nextTaskId})
+          //Create link in neo4j with nextTaskIds
+          nextTaskIds.map((nextTaskId) => {
+            runCypher(
+              "MATCH (downstream_task:Job{taskId:$downstreamTaskIdParam}), (next_task:Job{taskId:$nextTaskIdParam}) MERGE (downstream_task)-[:activates]->(next_task)",
+              {
+                downstreamTaskIdParam: parentDagId + "." + task.task_id,
+                nextTaskIdParam: nextTaskId,
+              }
+            );
           });
         }
       });
 
       dag.tasks.forEach((task) => {
-        //rename
-        task.downstream_task_ids.forEach((x, index) => task.downstream_task_ids[index] = parentDagId + "." + x);
         const fetchPromise = fetch(
           marquez_backend +
             "namespaces/example/jobs/" + //"example" to be replaced
@@ -194,7 +210,7 @@ function lineageCreation(parentDagId, nextTaskIds, waitForCompletion) {
             task.task_id
         )
           .then((marquez_task_result) => marquez_task_result.json())
-          .then((marquez_task) => {
+          .then(async (marquez_task) => {
             //Since Marquez API returns a string, 2 represents an empty list
             if (
               marquez_task.latestRun.facets.airflow.task.upstream_task_ids
@@ -203,47 +219,59 @@ function lineageCreation(parentDagId, nextTaskIds, waitForCompletion) {
               roots.push(parentDagId + "." + task.task_id);
             }
             const wait_for_completion =
-                marquez_task.latestRun.facets.airflow.task.args
-                  .wait_for_completion;
-            
+              marquez_task.latestRun.facets.airflow.task.args
+                .wait_for_completion;
+
             if (task.operator_name == "TriggerDagRunOperator") {
               if (!wait_for_completion) {
-                task.downstream_task_ids.forEach((downStreamTask) => {
-                  console.log(parentDagId + "." + task.task_id + " -> " + downStreamTask);
-                  runCypher('MATCH (downstream_task:Job{taskId:$downstreamTaskIdParam}), (next_task:Job{taskId:$nextTaskIdParam}) MERGE (downstream_task)-[:activates]->(next_task)', {downstreamTaskIdParam:parentDagId + "." + task.task_id, nextTaskIdParam: downstreamTask})
+                task.downstream_task_ids.map((downStreamTask) => {
+                  runCypher(
+                    "MATCH (downstream_task:Job{taskId:$downstreamTaskIdParam}), (next_task:Job{taskId:$nextTaskIdParam}) MERGE (downstream_task)-[:activates]->(next_task)",
+                    {
+                      downstreamTaskIdParam: parentDagId + "." + task.task_id,
+                      nextTaskIdParam: downStreamTask,
+                    }
+                  );
                 });
               }
               const target_dag_id =
                 marquez_task.latestRun.facets.airflow.task.args.trigger_dag_id;
-              console.log("Entering " + target_dag_id);
               fetchPromises.push(
                 lineageCreation(
                   target_dag_id,
                   task.downstream_task_ids,
                   wait_for_completion
                 ).then((downstream_roots) => {
-                  downstream_roots.forEach((root_task_id) => {
-                    console.log(parentDagId + "." + task.task_id + " -> " + root_task_id);
-                    runCypher('MATCH (downstream_task:Job{taskId:$downstreamTaskIdParam}), (next_task:Job{taskId:$nextTaskIdParam}) MERGE (downstream_task)-[:activates]->(next_task)', {downstreamTaskIdParam:parentDagId + "." + task.task_id, nextTaskIdParam: root_task_id})
+                  downstream_roots.map((root_task_id) => {
+                    runCypher(
+                      "MATCH (downstream_task:Job{taskId:$downstreamTaskIdParam}), (next_task:Job{taskId:$nextTaskIdParam}) MERGE (downstream_task)-[:activates]->(next_task)",
+                      {
+                        downstreamTaskIdParam: parentDagId + "." + task.task_id,
+                        nextTaskIdParam: root_task_id,
+                      }
+                    );
                   });
                 })
               );
             } else {
-              task.downstream_task_ids.forEach((downStreamTask) => {
-                console.log(parentDagId + "." + task.task_id + " -> " + downStreamTask);
-                runCypher('MATCH (downstream_task:Job{taskId:$downstreamTaskIdParam}), (next_task:Job{taskId:$nextTaskIdParam}) MERGE (downstream_task)-[:activates]->(next_task)', {downstreamTaskIdParam:parentDagId + "." + task.task_id, nextTaskIdParam: downStreamTask})
+              task.downstream_task_ids.map((downStreamTask) => {
+                runCypher(
+                  "MATCH (downstream_task:Job{taskId:$downstreamTaskIdParam}), (next_task:Job{taskId:$nextTaskIdParam}) MERGE (downstream_task)-[:activates]->(next_task)",
+                  {
+                    downstreamTaskIdParam: parentDagId + "." + task.task_id,
+                    nextTaskIdParam: downStreamTask
+                  }
+                );
               });
             }
           });
 
         fetchPromises.push(fetchPromise);
       });
-
-      console.log("Exiting " + parentDagId);
       return Promise.all(fetchPromises).then(() => roots);
     });
-    
 }
+
 
 
 function createAirflowJob() {

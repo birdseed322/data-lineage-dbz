@@ -104,7 +104,7 @@ services:
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
+      - POSTGRES_PASSWORD=
       - AIRFLOW_USER=airflow
       - AIRFLOW_PASSWORD=airflow
       - AIRFLOW_DB=airflow
