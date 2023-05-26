@@ -268,3 +268,31 @@ The system database supports a restricted set of Cypher clauses. The supported c
 2023-05-26 03:31:47.266+0000 INFO  Neo4j Server shutdown initiated by request
 2023-05-26 03:31:47.269+0000 INFO  Stopping...
 2023-05-26 03:31:53.526+0000 INFO  Stopped.
+2023-05-26 03:46:37.823+0000 WARN  Use of deprecated setting 'dbms.memory.pagecache.size'. It is replaced by 'server.memory.pagecache.size'.
+2023-05-26 03:46:37.829+0000 WARN  Use of deprecated setting 'dbms.memory.heap.max_size'. It is replaced by 'server.memory.heap.max_size'.
+2023-05-26 03:46:37.832+0000 INFO  Starting...
+2023-05-26 03:46:38.466+0000 INFO  This instance is ServerId{ea0819c0} (ea0819c0-f25f-4e4f-8679-d6363b93bb40)
+2023-05-26 03:46:39.434+0000 INFO  ======== Neo4j 5.7.0 ========
+2023-05-26 03:46:43.030+0000 INFO  Bolt enabled on 0.0.0.0:7687.
+2023-05-26 03:46:43.822+0000 INFO  Remote interface available at http://localhost:7474/
+2023-05-26 03:46:43.826+0000 INFO  id: 23517D66786BC361D80613C48F1437BB51BB5BE8B60290E02CA98F0E0DA0C052
+2023-05-26 03:46:43.828+0000 INFO  name: system
+2023-05-26 03:46:43.829+0000 INFO  creationDate: 2023-05-19T03:13:17.827Z
+2023-05-26 03:46:43.830+0000 INFO  Started.
+2023-05-26 03:48:32.155+0000 INFO  Neo4j Server shutdown initiated by request
+2023-05-26 03:48:32.158+0000 INFO  Stopping...
+2023-05-26 03:48:37.530+0000 INFO  Stopped.
+2023-05-26 03:49:30.006+0000 WARN  Use of deprecated setting 'dbms.memory.pagecache.size'. It is replaced by 'server.memory.pagecache.size'.
+2023-05-26 03:49:30.014+0000 WARN  Use of deprecated setting 'dbms.memory.heap.max_size'. It is replaced by 'server.memory.heap.max_size'.
+2023-05-26 03:49:30.018+0000 INFO  Starting...
+2023-05-26 03:49:30.653+0000 INFO  This instance is ServerId{ea0819c0} (ea0819c0-f25f-4e4f-8679-d6363b93bb40)
+2023-05-26 03:49:31.597+0000 INFO  ======== Neo4j 5.7.0 ========
+2023-05-26 03:49:34.590+0000 INFO  Bolt enabled on 0.0.0.0:7687.
+2023-05-26 03:49:35.405+0000 INFO  Remote interface available at http://localhost:7474/
+2023-05-26 03:49:35.410+0000 INFO  id: 23517D66786BC361D80613C48F1437BB51BB5BE8B60290E02CA98F0E0DA0C052
+2023-05-26 03:49:35.411+0000 INFO  name: system
+2023-05-26 03:49:35.414+0000 INFO  creationDate: 2023-05-19T03:13:17.827Z
+2023-05-26 03:49:35.416+0000 INFO  Started.
+2023-05-26 03:50:48.981+0000 INFO  Neo4j Server shutdown initiated by request
+2023-05-26 03:50:48.983+0000 INFO  Stopping...
+2023-05-26 03:50:54.392+0000 INFO  Stopped.

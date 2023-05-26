@@ -67,7 +67,7 @@ services:
     volumes:
       - ./dags:/opt/bitnami/airflow/dags
       - ./airflow.cfg:/opt/bitnami/airflow/airflow.cfg
-      -   /whl:/whl
+      - /whl:/whl
       - type: bind
         source: ${PWD}/requirements.txt
         target: /bitnami/python/requirements.txt
@@ -106,10 +106,10 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=
       - AIRFLOW_USER=airflow
-      - AIRFLOW_PASSWORD=airflow
+      - AIRFLOW_PASSWORD=
       - AIRFLOW_DB=airflow
       - MARQUEZ_USER=marquez
-      - MARQUEZ_PASSWORD=marquez
+      - MARQUEZ_PASSWORD=
       - MARQUEZ_DB=marquez
       - EXAMPLE_USER=example
       - EXAMPLE_PASSWORD=example
@@ -134,7 +134,7 @@ services:
       - ./import:/import
       - ./logs:/logs
       - ./plugins:/plugins
-    environment: 
+    environment:
       # Raise memory limits
       - NEO4J_dbms_memory_pagecache_size=1G
       - NEO4J_dbms.memory.heap.initial_size=1G
