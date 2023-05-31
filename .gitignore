@@ -1,4 +1,6 @@
 restAPI/node_modules/
 .vscode/
 docker-compose-marquez/data/
-docker-compose-marquez/logs
+docker-compose-marquez/logs/
+docker-compose-marquez/kafka/kafka/
+docker-compose-marquez/dags/__pycache__/
