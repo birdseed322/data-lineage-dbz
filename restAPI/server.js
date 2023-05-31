@@ -14,7 +14,9 @@ var driver = neo4j.driver(
   "bolt://localhost",
   neo4j.auth.basic(neo4jUsername, neo4jPassword)
 );
+var session = driver.session();
 
+var fs = require("fs");
 //Dependencies
 app.use(express.json());
 
@@ -156,29 +158,6 @@ app.use(express.json());
 //   writeTrx.catch((err) => {console.log(err)}).then(() => {session.close()})
 // }
 
-const dagNodesWriter = createCsvWriter({
-  path: "./csv/dags.csv",
-  header: [{ id: "dag_id", title: "DAG_ID" }],
-});
-const taskNodesWriter = createCsvWriter({
-  path: "./csv/tasks.csv",
-  header: [{ id: "task_id", title: "TASK_ID" }],
-});
-const dagTasksRelationsWriter = createCsvWriter({
-  path: "./csv/dagTasksRelations.csv",
-  header: [
-    { id: "dag_id", title: "DAG_ID" },
-    { id: "task_id", title: "TASK_ID" },
-  ],
-});
-const interTasksRelationsWriter = createCsvWriter({
-  path: "./csv/interTaskRelations.csv",
-  header: [
-    { id: "source_id", title: "SOURCE_ID" },
-    { id: "dest_id", title: "DEST_ID" },
-  ],
-});
-
 async function fetchMarquez(parentDagId, task) {
   const result = await fetch(
     marquez_backend +
@@ -202,8 +181,15 @@ async function fetchAirflowDag(parentDagId) {
   ).then((result) => result.json());
   return result;
 }
+if (!fs.existsSync("./csv")) {
+  fs.mkdirSync("./csv");
+}
 //lineageCreation function implemented with CSV
 async function lineageCreation(parentDagId, nextParentTaskIds) {
+  const csvDir = "./csv/" + parentDagId + "_csv";
+  if (!fs.existsSync(csvDir)) {
+    fs.mkdirSync(csvDir);
+  }
   //root nodes of DAG to be returned
   const rootsArr = [];
   const dagArr = [{ dag_id: parentDagId }];
@@ -211,21 +197,45 @@ async function lineageCreation(parentDagId, nextParentTaskIds) {
   const interTasksRelationsArr = [];
   const dagTasksRelationsArr = [];
 
+  const dagNodesWriter = createCsvWriter({
+    path: "./" + csvDir + "/dags.csv",
+    header: [{ id: "dag_id", title: "DAG_ID" }],
+  });
+  const taskNodesWriter = createCsvWriter({
+    path: "./" + csvDir + "/tasks.csv",
+    header: [{ id: "task_id", title: "TASK_ID" }],
+  });
+  const dagTasksRelationsWriter = createCsvWriter({
+    path: "./" + csvDir + "/dagTasksRelations.csv",
+    header: [
+      { id: "dag_id", title: "DAG_ID" },
+      { id: "task_id", title: "TASK_ID" },
+    ],
+  });
+  const interTasksRelationsWriter = createCsvWriter({
+    path: "./" + csvDir + "/interTasksRelations.csv",
+    header: [
+      { id: "source_id", title: "SOURCE_ID" },
+      { id: "dest_id", title: "DEST_ID" },
+    ],
+  });
+
   //Fetch tasks of the DAG from Airflow API call
   const airflowDag = await fetchAirflowDag(parentDagId);
   airflowDag.tasks.forEach((task) => {
+    const taskName = parentDagId + "." + task.task_id;
     //Compile tasks in the DAG to be written to jobs.csv
-    tasksArr.push({ task_id: task.task_id });
+    tasksArr.push({ task_id: taskName });
     //Compile relations between tasks and the dag
     dagTasksRelationsArr.push({
       dag_id: parentDagId,
-      task_id: task.task_id,
+      task_id: taskName,
     });
     //Links relations from leaf nodes to nodes from master dag
     if (task.downstream_task_ids.length == 0 && nextParentTaskIds != null) {
       nextParentTaskIds.forEach((nextParentTaskId) => {
         interTasksRelationsArr.push({
-          source_id: task.task_id,
+          source_id: taskName,
           dest_id: nextParentTaskId,
         });
       });
@@ -235,13 +245,13 @@ async function lineageCreation(parentDagId, nextParentTaskIds) {
   //Push root nodes of a DAG to an array to return
   await Promise.all(
     airflowDag.tasks.map(async (task) => {
+      const taskName = parentDagId + "." + task.task_id;
       const taskMarquez = await fetchMarquez(parentDagId, task);
-      console.log(taskMarquez.operator_name);
       if (
         taskMarquez.latestRun.facets.airflow.task.upstream_task_ids.length == 2
         //equivalent to "[]", an empty list
       ) {
-        rootsArr.push(parentDagId + "." + task.task_id);
+        rootsArr.push(taskName);
       }
 
       // Check whether it waits for triggered dag to complete
@@ -253,8 +263,8 @@ async function lineageCreation(parentDagId, nextParentTaskIds) {
           //Creates link to downstream tasks id
           task.downstream_task_ids.forEach((downStreamTaskId) => {
             interTasksRelationsArr.push({
-              source_id: task.task_id,
-              dest_id: downStreamTaskId,
+              source_id: taskName,
+              dest_id: parentDagId + "." + downStreamTaskId,
             });
           });
         }
@@ -264,11 +274,11 @@ async function lineageCreation(parentDagId, nextParentTaskIds) {
 
         //Link trigger task to root tasks of triggered dag
         await lineageCreation(target_dag_id, task.downstream_task_ids).then(
-          (downstreamRootsIds) => {
-            downstreamRootsIds.forEach((downstreamRootsId) => {
+          (childRootsIds) => {
+            childRootsIds.forEach((childRootsId) => {
               interTasksRelationsArr.push({
-                source_id: task.task_id,
-                dest_id: downstreamRootsId,
+                source_id: taskName,
+                dest_id: childRootsId,
               });
             });
           }
@@ -277,8 +287,8 @@ async function lineageCreation(parentDagId, nextParentTaskIds) {
         //Creates link to downstream tasks id
         task.downstream_task_ids.forEach((downStreamTaskId) => {
           interTasksRelationsArr.push({
-            source_id: task.task_id,
-            dest_id: downStreamTaskId,
+            source_id: taskName,
+            dest_id: parentDagId + "." + downStreamTaskId,
           });
         });
       }
@@ -294,12 +304,34 @@ async function lineageCreation(parentDagId, nextParentTaskIds) {
   //Write relations between a task and its downstream tasks to interTasksRelations.csv
   await interTasksRelationsWriter.writeRecords(interTasksRelationsArr);
 
+  //If master DAG, import into Neo4j
   if (nextParentTaskIds == null) {
-    //If it is master DAG, import commands
+    const queries = [
+      `LOAD CSV WITH HEADERS FROM 'file:///csv/${parentDagId}_csv/dags.csv' AS row
+        MERGE (:Dag {dagId: row.DAG_ID})`,
+
+      `LOAD CSV WITH HEADERS FROM 'file:///csv/${parentDagId}_csv/tasks.csv' AS row
+        MERGE (:Task {taskId: row.TASK_ID})`,
+
+      `LOAD CSV WITH HEADERS FROM 'file:///csv/${parentDagId}_csv/dagTasksRelations.csv' AS row
+        MATCH (dag:Dag) WHERE dag.dagId = row.DAG_ID
+        MATCH (task:Task) WHERE task.taskId = row.TASK_ID
+        MERGE (dag)-[:Parent]->(task)`,
+
+      `LOAD CSV WITH HEADERS FROM 'file:///csv/${parentDagId}_csv/interTasksRelations.csv' AS row
+        MATCH (source:Task) WHERE source.taskId = row.SOURCE_ID
+        MATCH (dest:Task) WHERE dest.taskId = row.DEST_ID
+        MERGE (source)-[:Activates]->(dest)`,
+    ];
+
+    for (query of queries) {
+      await session.run(query).catch((err) => {
+        console.log(err);
+      });
+    }
   }
   return rootsArr;
 }
-
 // //Second draft of algo. Async considered
 // function lineageCreation(parentDagId, nextTaskIds, waitForCompletion) {
 //   var roots = [];
