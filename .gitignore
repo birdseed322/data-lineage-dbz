@@ -2,3 +2,4 @@ restAPI/node_modules/
 .vscode/
 docker-compose-marquez/data/
 docker-compose-marquez/logs
+restAPI/csv/

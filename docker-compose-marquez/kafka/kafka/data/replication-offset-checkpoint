@@ -1,6 +1,6 @@
 0
 82
-test 0 524
+test 0 551
 __consumer_offsets 43 3
 __consumer_offsets 30 0
 __consumer_offsets 32 0
@@ -11,7 +11,7 @@ __consumer_offsets 41 0
 quickstart-offsets 0 0
 __consumer_offsets 49 0
 quickstart-offsets 24 0
-__consumer_offsets 40 65
+__consumer_offsets 40 68
 quickstart-offsets 18 0
 quickstart-offsets 13 0
 quickstart-offsets 2 0
@@ -56,7 +56,7 @@ __consumer_offsets 24 0
 quickstart-status 3 0
 __consumer_offsets 3 0
 __consumer_offsets 17 0
-__consumer_offsets 39 65
+__consumer_offsets 39 67
 __consumer_offsets 2 0
 __consumer_offsets 44 0
 quickstart-offsets 12 0
@@ -69,16 +69,16 @@ __consumer_offsets 47 0
 quickstart-offsets 22 0
 quickstart-offsets 14 0
 __consumer_offsets 7 0
-quickstart-config 0 57
+quickstart-config 0 58
 quickstart-offsets 15 0
-quickstart-status 0 67
+quickstart-status 0 68
 __consumer_offsets 22 0
 __consumer_offsets 46 0
 quickstart-offsets 8 0
 __consumer_offsets 31 0
 __consumer_offsets 5 3
 quickstart-offsets 1 0
-quickstart-status 1 52
+quickstart-status 1 53
 __consumer_offsets 15 0
 __consumer_offsets 34 0
 __consumer_offsets 9 0
