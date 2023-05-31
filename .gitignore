@@ -4,3 +4,5 @@ docker-compose-marquez/data/
 docker-compose-marquez/logs/
 docker-compose-marquez/kafka/kafka/
 docker-compose-marquez/dags/__pycache__/
+restAPI/csv/
+

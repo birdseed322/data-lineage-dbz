@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 {"clusterId":"","leaderId":1,"leaderEpoch":24,"votedId":-1,"appliedOffset":0,"currentVoters":[{"voterId":1}],"data_version":0}
+=======
+{"clusterId":"","leaderId":1,"leaderEpoch":20,"votedId":-1,"appliedOffset":0,"currentVoters":[{"voterId":1}],"data_version":0}
+>>>>>>> 1e23d4d8d86b70c75b1eeb1c0e7b72ebc12639e3
