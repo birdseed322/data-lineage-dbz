@@ -1,7 +1,14 @@
 //Initialise const vars
+const {
+  createCsvDirectory,
+  fetchAirflowDag,
+  fetchMarquez,
+  createCsvWriters,
+  writeRecords,
+  importCSVs,
+} = require("./csv-helper-functions");
 const express = require("express");
 const { Kafka } = require("kafkajs");
-const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const app = express();
 const marquez_backend = "http://localhost:5000/api/v1/";
 const airflow_backend = "http://localhost:8080/api/v1/";
@@ -18,7 +25,6 @@ var driver = neo4j.driver(
 );
 var session = driver.session();
 
-var fs = require("fs");
 //Dependencies
 app.use(express.json());
 
@@ -177,32 +183,6 @@ async function createTaskTaskRelationship(taskId1, taskId2) {
     });
 }
 
-async function fetchMarquez(parentDagId, task) {
-  const result = await fetch(
-    marquez_backend +
-      //"example to be replaced"
-      "namespaces/example/jobs/" +
-      parentDagId +
-      "." +
-      task.task_id
-  ).then((fetch) => fetch.json());
-  return result;
-}
-
-async function fetchAirflowDag(parentDagId) {
-  const result = await fetch(
-    airflow_backend + "dags/" + parentDagId + "/tasks",
-    {
-      headers: {
-        Authorization: "Basic " + btoa(airflow_user + ":" + airflow_password),
-      },
-    }
-  ).then((result) => result.json());
-  return result;
-}
-if (!fs.existsSync("./csv")) {
-  fs.mkdirSync("./csv");
-}
 //-------------------------------------------------------------------------
 //First draft of algo. Async not considered
 // function lineageCreation(parentDagId, nextTaskIds, waitForCompletion) {
@@ -481,44 +461,25 @@ async function lineageCreationAsync(
 
 //lineageCreation function implemented with CSV
 async function lineageCreationCSV(parentDagId, nextParentTaskIds) {
-  const csvDir = "../docker-compose-marquez/import/" + parentDagId + "_csv";
-  if (!fs.existsSync(csvDir)) {
-    fs.mkdirSync(csvDir, { recursive: true });
-  }
-  //root nodes of DAG to be returned
   const rootsArr = [];
   const dagArr = [{ dag_id: parentDagId }];
   const tasksArr = [];
   const interTasksRelationsArr = [];
   const dagTasksRelationsArr = [];
 
-  const dagNodesWriter = createCsvWriter({
-    path: csvDir + "/dags.csv",
-    header: [{ id: "dag_id", title: "DAG_ID" }],
-  });
-  const taskNodesWriter = createCsvWriter({
-    path: csvDir + "/tasks.csv",
-    header: [{ id: "task_id", title: "TASK_ID" }],
-  });
-  const dagTasksRelationsWriter = createCsvWriter({
-    path: csvDir + "/dagTasksRelations.csv",
-    header: [
-      { id: "dag_id", title: "DAG_ID" },
-      { id: "task_id", title: "TASK_ID" },
-    ],
-  });
-  const interTasksRelationsWriter = createCsvWriter({
-    path: csvDir + "/interTasksRelations.csv",
-    header: [
-      { id: "source_id", title: "SOURCE_ID" },
-      { id: "dest_id", title: "DEST_ID" },
-    ],
-  });
+  const csvDir = createCsvDirectory(parentDagId);
+  const csvWriters = createCsvWriters(csvDir);
 
   //Fetch tasks of the DAG from Airflow API call
-  const airflowDag = await fetchAirflowDag(parentDagId);
+  const airflowDag = await fetchAirflowDag(
+    airflow_backend,
+    airflow_user,
+    airflow_password,
+    parentDagId
+  );
+
   airflowDag.tasks.forEach((task) => {
-    const taskName = parentDagId + "." + task.task_id;
+    const taskName = `${parentDagId}.${task.task_id}`;
     //Compile tasks in the DAG to be written to jobs.csv
     tasksArr.push({ task_id: taskName });
     //Compile relations between tasks and the dag
@@ -540,8 +501,12 @@ async function lineageCreationCSV(parentDagId, nextParentTaskIds) {
   //Push root nodes of a DAG to an array to return
   await Promise.all(
     airflowDag.tasks.map(async (task) => {
-      const taskName = parentDagId + "." + task.task_id;
-      const taskMarquez = await fetchMarquez(parentDagId, task);
+      const taskName = `${parentDagId}.${task.task_id}`;
+      const taskMarquez = await fetchMarquez(
+        marquez_backend,
+        parentDagId,
+        task
+      );
       try {
         const noUpstreamTask =
           marquez_task.latestRun.facets.airflow.task.upstream_task_ids.length ==
@@ -549,7 +514,7 @@ async function lineageCreationCSV(parentDagId, nextParentTaskIds) {
             ? true
             : false;
         if (noUpstreamTask) {
-          roots.push(parentDagId + "." + task.task_id);
+          roots.push(taskName);
         }
       } catch (err) {
         console.log("Please run it on Airflow and Marquez first");
@@ -565,7 +530,7 @@ async function lineageCreationCSV(parentDagId, nextParentTaskIds) {
           task.downstream_task_ids.forEach((downStreamTaskId) => {
             interTasksRelationsArr.push({
               source_id: taskName,
-              dest_id: parentDagId + "." + downStreamTaskId,
+              dest_id: `${parentDagId}.${downStreamTaskId}`,
             });
           });
         }
@@ -589,49 +554,27 @@ async function lineageCreationCSV(parentDagId, nextParentTaskIds) {
         task.downstream_task_ids.forEach((downStreamTaskId) => {
           interTasksRelationsArr.push({
             source_id: taskName,
-            dest_id: parentDagId + "." + downStreamTaskId,
+            dest_id: `${parentDagId}.${downStreamTaskId}`,
           });
         });
       }
     })
   );
-  //Write DAG id to dags.csv
-  await dagNodesWriter.writeRecords(dagArr);
-  //Write all tasks in the DAG to tasks.csv
-  await taskNodesWriter.writeRecords(tasksArr);
-  //Write all relations between tasks and DAG to dagTasksRelations csv
-  await dagTasksRelationsWriter.writeRecords(dagTasksRelationsArr);
-  //Write relations between a task and its downstream tasks to interTasksRelations.csv
-  await interTasksRelationsWriter.writeRecords(interTasksRelationsArr);
+
+  await writeRecords(csvWriters, [
+    dagArr,
+    tasksArr,
+    dagTasksRelationsArr,
+    interTasksRelationsArr,
+  ]);
 
   //If master DAG, import into Neo4j
   if (nextParentTaskIds == null) {
-    const queries = [
-      `LOAD CSV WITH HEADERS FROM 'file:///${parentDagId}_csv/dags.csv' AS row
-        MERGE (:Dag {dagId: row.DAG_ID})`,
-
-      `LOAD CSV WITH HEADERS FROM 'file:///${parentDagId}_csv/tasks.csv' AS row
-        MERGE (:Task {taskId: row.TASK_ID})`,
-
-      `LOAD CSV WITH HEADERS FROM 'file:///${parentDagId}_csv/dagTasksRelations.csv' AS row
-        MATCH (dag:Dag) WHERE dag.dagId = row.DAG_ID
-        MATCH (task:Task) WHERE task.taskId = row.TASK_ID
-        MERGE (dag)-[:Parent]->(task)`,
-
-      `LOAD CSV WITH HEADERS FROM 'file:///${parentDagId}_csv/interTasksRelations.csv' AS row
-        MATCH (source:Task) WHERE source.taskId = row.SOURCE_ID
-        MATCH (dest:Task) WHERE dest.taskId = row.DEST_ID
-        MERGE (source)-[:Activates]->(dest)`,
-    ];
-
-    for (query of queries) {
-      await session.run(query).catch((err) => {
-        console.log(err);
-      });
-    }
+    await importCSVs(parentDagId, session);
   }
   return rootsArr;
 }
+
 //Second draft of algo. Async considered
 function lineageCreation(parentDagId, nextTaskIds, waitForCompletion) {
   var roots = [];
@@ -692,17 +635,13 @@ function lineageCreation(parentDagId, nextTaskIds, waitForCompletion) {
           .then((marquez_task_result) => marquez_task_result.json())
           .then(async (marquez_task) => {
             //Since Marquez API returns a string, 2 represents an empty list
-            try {
-              const noUpstreamTask =
-                marquez_task.latestRun.facets.airflow.task.upstream_task_ids
-                  .length == 2
-                  ? true
-                  : false;
-              if (noUpstreamTask) {
-                roots.push(parentDagId + "." + task.task_id);
-              }
-            } catch (err) {
-              console.log("Please run it on Airflow and Marquez first");
+            const noUpstreamTask =
+              marquez_task.latestRun.facets.airflow.task.upstream_task_ids
+                .length == 2
+                ? true
+                : false;
+            if (noUpstreamTask) {
+              roots.push(parentDagId + "." + task.task_id);
             }
 
             const wait_for_completion =
@@ -759,7 +698,7 @@ function lineageCreation(parentDagId, nextTaskIds, waitForCompletion) {
 }
 
 app.get("/", function (req, res) {
-  res.send("Hello World");
+  res.send("Landing Page");
 });
 
 //Traffic redirected to leverage Marquez lineage tech
@@ -779,10 +718,15 @@ app.get("/airflow/lineage/:dagId", function (req, res) {
   lineageCreationAsync(req.params.dagId, null);
   res.send("ok");
 });
+
 app.get("/airflow/lineagecsv/:dagId", function (req, res) {
   console.log("-------------NEW QUERY -----------------------");
-  lineageCreationCSV(req.params.dagId, null);
-  res.send("ok");
+  try {
+    lineageCreationCSV(req.params.dagId, null);
+    res.send("Called lineageCreationCsv");
+  } catch (err) {
+    console.log(err);
+  }
 });
 
 app.listen(3001, function () {

@@ -23,9 +23,10 @@ services:
     volumes:
       - ./dags:/opt/bitnami/airflow/dags
       - ./airflow.cfg:/opt/bitnami/airflow/airflow.cfg
-      - ${PWD}/whl:/whl
+      - /whl:/whl
       - type: bind
-        source: ${PWD}/requirements.txt
+        # source: ${PWD}/requirements.txt
+        source: ./requirements.txt
         target: /bitnami/python/requirements.txt
 
   airflow_scheduler:
@@ -45,9 +46,11 @@ services:
     volumes:
       - ./dags:/opt/bitnami/airflow/dags
       - ./airflow.cfg:/opt/bitnami/airflow/airflow.cfg
-      - ${PWD}/whl:/whl
+      # - ${PWD}/whl:/whl
+      - ./whl:/whl
       - type: bind
-        source: ${PWD}/requirements.txt
+        # source: ${PWD}/requirements.txt
+        source: ./requirements.txt
         target: /bitnami/python/requirements.txt
 
   airflow_worker:
@@ -69,7 +72,8 @@ services:
       - ./airflow.cfg:/opt/bitnami/airflow/airflow.cfg
       - /whl:/whl
       - type: bind
-        source: ${PWD}/requirements.txt
+        source: ./requirements.txt
+        # source: ${PWD}/requirements.txt
         target: /bitnami/python/requirements.txt
 
   marquez:
