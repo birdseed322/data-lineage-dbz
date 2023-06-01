@@ -2,5 +2,5 @@ restAPI/node_modules/
 .vscode/
 docker-compose-marquez/data/
 docker-compose-marquez/logs/
-docker-compose-marquez/kafka/
+docker-compose-marquez/kafka/kafka/
 restAPI/csv/
