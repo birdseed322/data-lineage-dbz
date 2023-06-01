@@ -1256,3 +1256,28 @@ The system database supports a restricted set of Cypher clauses. The supported c
 2023-05-26 03:50:48.983+0000 INFO  Stopping...
 2023-05-26 03:50:54.392+0000 INFO  Stopped.
 >>>>>>> 8ce927d8ebe616585e8407311a2eda7cb5138df1
+2023-05-31 09:29:01.951+0000 WARN  Use of deprecated setting 'dbms.memory.pagecache.size'. It is replaced by 'server.memory.pagecache.size'.
+2023-05-31 09:29:01.986+0000 WARN  Use of deprecated setting 'dbms.memory.heap.max_size'. It is replaced by 'server.memory.heap.max_size'.
+2023-05-31 09:29:02.009+0000 INFO  Starting...
+2023-05-31 09:29:04.928+0000 INFO  This instance is ServerId{ea0819c0} (ea0819c0-f25f-4e4f-8679-d6363b93bb40)
+2023-05-31 09:29:08.735+0000 INFO  ======== Neo4j 5.7.0 ========
+2023-05-31 09:29:20.774+0000 INFO  Bolt enabled on 0.0.0.0:7687.
+2023-05-31 09:29:24.064+0000 INFO  Remote interface available at http://localhost:7474/
+2023-05-31 09:29:24.073+0000 INFO  id: 23517D66786BC361D80613C48F1437BB51BB5BE8B60290E02CA98F0E0DA0C052
+2023-05-31 09:29:24.076+0000 INFO  name: system
+2023-05-31 09:29:24.078+0000 INFO  creationDate: 2023-05-19T03:13:17.827Z
+2023-05-31 09:29:24.081+0000 INFO  Started.
+2023-05-31 09:47:16.896+0000 INFO  Neo4j Server shutdown initiated by request
+2023-05-31 09:47:16.910+0000 INFO  Stopping...
+2023-05-31 09:47:22.091+0000 INFO  Stopped.
+2023-06-01 02:31:23.538+0000 WARN  Use of deprecated setting 'dbms.memory.pagecache.size'. It is replaced by 'server.memory.pagecache.size'.
+2023-06-01 02:31:23.589+0000 WARN  Use of deprecated setting 'dbms.memory.heap.max_size'. It is replaced by 'server.memory.heap.max_size'.
+2023-06-01 02:31:23.624+0000 INFO  Starting...
+2023-06-01 02:31:25.426+0000 INFO  This instance is ServerId{ea0819c0} (ea0819c0-f25f-4e4f-8679-d6363b93bb40)
+2023-06-01 02:31:27.594+0000 INFO  ======== Neo4j 5.7.0 ========
+2023-06-01 02:31:33.499+0000 INFO  Bolt enabled on 0.0.0.0:7687.
+2023-06-01 02:31:34.677+0000 INFO  Remote interface available at http://localhost:7474/
+2023-06-01 02:31:34.686+0000 INFO  id: 23517D66786BC361D80613C48F1437BB51BB5BE8B60290E02CA98F0E0DA0C052
+2023-06-01 02:31:34.688+0000 INFO  name: system
+2023-06-01 02:31:34.690+0000 INFO  creationDate: 2023-05-19T03:13:17.827Z
+2023-06-01 02:31:34.692+0000 INFO  Started.

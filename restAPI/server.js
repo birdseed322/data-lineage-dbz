@@ -431,9 +431,9 @@ async function lineageCreationAsync(parentDagId, nextTaskIds, waitForCompletion)
           fetchPromises.push(fetchPromise);
         }
         )
+        return Promise.all(fetchPromises).then(() => roots);
       }
     )
-    return Promise.all(fetchPromises).then(() => roots);
   }
 
 //lineageCreation function implemented with CSV
