@@ -1,6 +1,6 @@
 //Initialise const vars
 const express = require("express");
-const { Kafka } = require('kafkajs');
+const { Kafka } = require("kafkajs");
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const app = express();
 const marquez_backend = "http://localhost:5000/api/v1/";
@@ -9,7 +9,7 @@ const airflow_user = "airflow";
 const airflow_password = "airflow";
 const neo4jUsername = "neo4j";
 const neo4jPassword = "password";
-var savedBookMarks = []
+var savedBookMarks = [];
 
 var neo4j = require("neo4j-driver");
 var driver = neo4j.driver(
@@ -24,18 +24,18 @@ app.use(express.json());
 
 //KAFKA TEST
 // Kafka broker connection details
-const kafkaBrokers = ['localhost:9092'];
-const kafkaTopic = 'test';
+const kafkaBrokers = ["localhost:9092"];
+const kafkaTopic = "test";
 const setupKafkaConnect = fetch("http://localhost:8083/connectors", {
-  method:"POST",
+  method: "POST",
   headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    "Content-Type": "application/json",
+    Accept: "application/json",
   },
   body: JSON.stringify({
-    "name": "Neo4jSinkConnectorJSONString",
-    "config": {
-      "topics": "test",
+    name: "Neo4jSinkConnectorJSONString",
+    config: {
+      topics: "test",
       "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
       "key.converter": "org.apache.kafka.connect.json.JsonConverter",
       "key.converter.schemas.enable": false,
@@ -49,100 +49,132 @@ const setupKafkaConnect = fetch("http://localhost:8083/connectors", {
       "neo4j.server.uri": "bolt://neo4jServer:7687",
       "neo4j.authentication.basic.username": "neo4j",
       "neo4j.authentication.basic.password": "password",
-      "neo4j.topic.cud": "test"
-    }
-  }
-  )
-}).then((res) => {
-  console.log("Connector set!");
-}).catch((err) => {
-  console.log("Error when setting connector: " + err);
+      "neo4j.topic.cud": "test",
+    },
+  }),
 })
+  .then((res) => {
+    console.log("Connector set!");
+  })
+  .catch((err) => {
+    console.log("Error when setting connector: " + err);
+  });
 
 // Create a new Kafka producer
-const kafka = new Kafka({ clientId: 'quickstart--shared-admin',
-  brokers: kafkaBrokers });
-const producer = kafka.producer({allowAutoTopicCreation: true});
+const kafka = new Kafka({
+  clientId: "quickstart--shared-admin",
+  brokers: kafkaBrokers,
+});
+const producer = kafka.producer({ allowAutoTopicCreation: true });
 
 async function createDagNode(dagId) {
-  producer.connect().then(() => {
-    console.log("SENDING CREATEDAG MESSAGE TO Q");
-    producer.send({
-      topic: "test",
-      messages: [{
-        value : JSON.stringify({
-          "op": "merge",
-          "properties": {
-            dagId,
+  producer
+    .connect()
+    .then(() => {
+      console.log("SENDING CREATEDAG MESSAGE TO Q");
+      producer.send({
+        topic: "test",
+        messages: [
+          {
+            value: JSON.stringify({
+              op: "merge",
+              properties: {
+                dagId,
+              },
+              ids: { dagId },
+              labels: ["Dag"],
+              type: "node",
+              detach: true,
+            }),
           },
-          "ids": {dagId},
-          "labels": ["Dag"],
-          "type": "node",
-          "detach": true
-        })
-      }]
+        ],
+      });
     })
-  }).catch((err) => {
-    console.log("Error when creating: " + dagId + " Error message: " + err);
-  });
+    .catch((err) => {
+      console.log("Error when creating: " + dagId + " Error message: " + err);
+    });
 }
 
 async function createDagTaskRelationship(dagId, taskId) {
-  producer.connect().then(() => {
-    console.log("SENDING CREATEDAGTASKRS MESSAGE TO Q");
-    producer.send({
-      topic: "test",
-      messages: [{
-        value : JSON.stringify({
-          "op": "merge",
-          "properties": {},
-          "rel_type":"is_parent_of",
-          "from": {
-            "ids":{dagId},
-            "labels":["Dag"],
-            "op" : "merge"
+  producer
+    .connect()
+    .then(() => {
+      console.log("SENDING CREATEDAGTASKRS MESSAGE TO Q");
+      producer.send({
+        topic: "test",
+        messages: [
+          {
+            value: JSON.stringify({
+              op: "merge",
+              properties: {},
+              rel_type: "is_parent_of",
+              from: {
+                ids: { dagId },
+                labels: ["Dag"],
+                op: "merge",
+              },
+              to: {
+                ids: { taskId: dagId + "." + taskId },
+                labels: ["Job"],
+                op: "merge",
+              },
+              type: "relationship",
+            }),
           },
-          "to":{
-            "ids":{"taskId":dagId + "." + taskId},
-            "labels":["Job"],
-            "op":"merge"
-          },
-          "type": "relationship",
-        })
-      }]
+        ],
+      });
     })
-  }).catch((err) => {
-    console.log("Error when creating: " + dagId + " to " + taskId + " Error message: " + err);
-  });
+    .catch((err) => {
+      console.log(
+        "Error when creating: " +
+          dagId +
+          " to " +
+          taskId +
+          " Error message: " +
+          err
+      );
+    });
 }
 
 async function createTaskTaskRelationship(taskId1, taskId2) {
-  producer.connect().then(() => {
-    console.log("SENDING CREATETASKTASKRS MESSAGE TO Q");
-    producer.send({
-      topic: "test",
-      messages: [{
-        value : JSON.stringify({
-          "op": "merge",
-          "properties": {},
-          "rel_type":"activates",
-          "from": {
-            "ids":{"taskId":taskId1},
-            "labels":["Job"],
-            "op" : "merge"
+  producer
+    .connect()
+    .then(() => {
+      console.log("SENDING CREATETASKTASKRS MESSAGE TO Q");
+      producer.send({
+        topic: "test",
+        messages: [
+          {
+            value: JSON.stringify({
+              op: "merge",
+              properties: {},
+              rel_type: "activates",
+              from: {
+                ids: { taskId: taskId1 },
+                labels: ["Job"],
+                op: "merge",
+              },
+              to: {
+                ids: { taskId: taskId2 },
+                labels: ["Job"],
+                op: "merge",
+              },
+              type: "relationship",
+            }),
           },
-          "to":{
-            "ids":{"taskId":taskId2},
-            "labels":["Job"],
-            "op":"merge"
-          },
-          "type": "relationship",
-        })
-      }]
+        ],
+      });
     })
-  }).catch((err) => {
-    console.log("Error when creating: " + taskId1 + " to " + taskId2 + " Error message: " + err);
-  });
+    .catch((err) => {
+      console.log(
+        "Error when creating: " +
+          taskId1 +
+          " to " +
+          taskId2 +
+          " Error message: " +
+          err
+      );
+    });
 }
 
 async function fetchMarquez(parentDagId, task) {
@@ -307,21 +339,24 @@ if (!fs.existsSync("./csv")) {
 //     return res;
 //   })
 
-
 //Lineage creation. Async considered.
-async function lineageCreationAsync(parentDagId, nextTaskIds, waitForCompletion) {
+async function lineageCreationAsync(
+  parentDagId,
+  nextTaskIds,
+  waitForCompletion
+) {
   var roots = [];
   // runCypher("MERGE(:Dag {dagId: $dagIdParam})", {
   //   dagIdParam: parentDagId,
   // });
-  await createDagNode(parentDagId);   
+  await createDagNode(parentDagId);
   return fetch(airflow_backend + "dags/" + parentDagId + "/tasks", {
     headers: {
       Authorization: "Basic " + btoa(airflow_user + ":" + airflow_password),
     },
   })
     .then((result) => {
-      return result.json()
+      return result.json();
     })
     .then((dag) => {
       const fetchPromises = [];
@@ -355,11 +390,13 @@ async function lineageCreationAsync(parentDagId, nextTaskIds, waitForCompletion)
             //     nextTaskIdParam: nextTaskId,
             //   }
             // );
-            await createTaskTaskRelationship(parentDagId + "." + task.task_id, nextTaskId)
+            await createTaskTaskRelationship(
+              parentDagId + "." + task.task_id,
+              nextTaskId
+            );
           });
         }
-      }
-      )
+      });
       dag.tasks.forEach(async (task) => {
         const fetchPromise = fetch(
           marquez_backend +
@@ -391,7 +428,10 @@ async function lineageCreationAsync(parentDagId, nextTaskIds, waitForCompletion)
                   //     nextTaskIdParam: downStreamTask,
                   //   }
                   // );
-                  await createTaskTaskRelationship(parentDagId + "." + task.task_id, downStreamTask)
+                  await createTaskTaskRelationship(
+                    parentDagId + "." + task.task_id,
+                    downStreamTask
+                  );
                 });
               }
               const target_dag_id =
@@ -410,7 +450,10 @@ async function lineageCreationAsync(parentDagId, nextTaskIds, waitForCompletion)
                     //     nextTaskIdParam: root_task_id,
                     //   }
                     // );
-                    await createTaskTaskRelationship(parentDagId + "." + task.task_id, root_task_id);
+                    await createTaskTaskRelationship(
+                      parentDagId + "." + task.task_id,
+                      root_task_id
+                    );
                   });
                 })
               );
@@ -423,24 +466,24 @@ async function lineageCreationAsync(parentDagId, nextTaskIds, waitForCompletion)
                 //     nextTaskIdParam: downStreamTask
                 //   }
                 // );
-                await createTaskTaskRelationship(parentDagId + "." + task.task_id, downStreamTask)
-              })
+                await createTaskTaskRelationship(
+                  parentDagId + "." + task.task_id,
+                  downStreamTask
+                );
+              });
             }
-          }
-          )
-          fetchPromises.push(fetchPromise);
-        }
-        )
-        return Promise.all(fetchPromises).then(() => roots);
-      }
-    )
-  }
+          });
+        fetchPromises.push(fetchPromise);
+      });
+      return Promise.all(fetchPromises).then(() => roots);
+    });
+}
 
 //lineageCreation function implemented with CSV
 async function lineageCreationCSV(parentDagId, nextParentTaskIds) {
-  const csvDir = "./csv/" + parentDagId + "_csv";
+  const csvDir = "../docker-compose-marquez/import/" + parentDagId + "_csv";
   if (!fs.existsSync(csvDir)) {
-    fs.mkdirSync(csvDir);
+    fs.mkdirSync(csvDir, { recursive: true });
   }
   //root nodes of DAG to be returned
   const rootsArr = [];
@@ -450,22 +493,22 @@ async function lineageCreationCSV(parentDagId, nextParentTaskIds) {
   const dagTasksRelationsArr = [];
 
   const dagNodesWriter = createCsvWriter({
-    path: "./" + csvDir + "/dags.csv",
+    path: csvDir + "/dags.csv",
     header: [{ id: "dag_id", title: "DAG_ID" }],
   });
   const taskNodesWriter = createCsvWriter({
-    path: "./" + csvDir + "/tasks.csv",
+    path: csvDir + "/tasks.csv",
     header: [{ id: "task_id", title: "TASK_ID" }],
   });
   const dagTasksRelationsWriter = createCsvWriter({
-    path: "./" + csvDir + "/dagTasksRelations.csv",
+    path: csvDir + "/dagTasksRelations.csv",
     header: [
       { id: "dag_id", title: "DAG_ID" },
       { id: "task_id", title: "TASK_ID" },
     ],
   });
   const interTasksRelationsWriter = createCsvWriter({
-    path: "./" + csvDir + "/interTasksRelations.csv",
+    path: csvDir + "/interTasksRelations.csv",
     header: [
       { id: "source_id", title: "SOURCE_ID" },
       { id: "dest_id", title: "DEST_ID" },
@@ -499,11 +542,17 @@ async function lineageCreationCSV(parentDagId, nextParentTaskIds) {
     airflowDag.tasks.map(async (task) => {
       const taskName = parentDagId + "." + task.task_id;
       const taskMarquez = await fetchMarquez(parentDagId, task);
-      if (
-        taskMarquez.latestRun.facets.airflow.task.upstream_task_ids.length == 2
-        //equivalent to "[]", an empty list
-      ) {
-        rootsArr.push(taskName);
+      try {
+        const noUpstreamTask =
+          marquez_task.latestRun.facets.airflow.task.upstream_task_ids.length ==
+          2
+            ? true
+            : false;
+        if (noUpstreamTask) {
+          roots.push(parentDagId + "." + task.task_id);
+        }
+      } catch (err) {
+        console.log("Please run it on Airflow and Marquez first");
       }
 
       // Check whether it waits for triggered dag to complete
@@ -558,18 +607,18 @@ async function lineageCreationCSV(parentDagId, nextParentTaskIds) {
   //If master DAG, import into Neo4j
   if (nextParentTaskIds == null) {
     const queries = [
-      `LOAD CSV WITH HEADERS FROM 'file:///csv/${parentDagId}_csv/dags.csv' AS row
+      `LOAD CSV WITH HEADERS FROM 'file:///${parentDagId}_csv/dags.csv' AS row
         MERGE (:Dag {dagId: row.DAG_ID})`,
 
-      `LOAD CSV WITH HEADERS FROM 'file:///csv/${parentDagId}_csv/tasks.csv' AS row
+      `LOAD CSV WITH HEADERS FROM 'file:///${parentDagId}_csv/tasks.csv' AS row
         MERGE (:Task {taskId: row.TASK_ID})`,
 
-      `LOAD CSV WITH HEADERS FROM 'file:///csv/${parentDagId}_csv/dagTasksRelations.csv' AS row
+      `LOAD CSV WITH HEADERS FROM 'file:///${parentDagId}_csv/dagTasksRelations.csv' AS row
         MATCH (dag:Dag) WHERE dag.dagId = row.DAG_ID
         MATCH (task:Task) WHERE task.taskId = row.TASK_ID
         MERGE (dag)-[:Parent]->(task)`,
 
-      `LOAD CSV WITH HEADERS FROM 'file:///csv/${parentDagId}_csv/interTasksRelations.csv' AS row
+      `LOAD CSV WITH HEADERS FROM 'file:///${parentDagId}_csv/interTasksRelations.csv' AS row
         MATCH (source:Task) WHERE source.taskId = row.SOURCE_ID
         MATCH (dest:Task) WHERE dest.taskId = row.DEST_ID
         MERGE (source)-[:Activates]->(dest)`,
@@ -611,10 +660,9 @@ function lineageCreation(parentDagId, nextTaskIds, waitForCompletion) {
             dagIdParam: parentDagId,
           }
         );
-        jobWriter.writeRecords([{task_id: task.task_id}])
-          .then(() => {
-            console.log("Wrote to job csv");
-          })
+        jobWriter.writeRecords([{ task_id: task.task_id }]).then(() => {
+          console.log("Wrote to job csv");
+        });
         if (
           waitForCompletion &&
           task.downstream_task_ids.length == 0 &&
@@ -644,12 +692,19 @@ function lineageCreation(parentDagId, nextTaskIds, waitForCompletion) {
           .then((marquez_task_result) => marquez_task_result.json())
           .then(async (marquez_task) => {
             //Since Marquez API returns a string, 2 represents an empty list
-            if (
-              marquez_task.latestRun.facets.airflow.task.upstream_task_ids
-                .length == 2
-            ) {
-              roots.push(parentDagId + "." + task.task_id);
+            try {
+              const noUpstreamTask =
+                marquez_task.latestRun.facets.airflow.task.upstream_task_ids
+                  .length == 2
+                  ? true
+                  : false;
+              if (noUpstreamTask) {
+                roots.push(parentDagId + "." + task.task_id);
+              }
+            } catch (err) {
+              console.log("Please run it on Airflow and Marquez first");
             }
+
             const wait_for_completion =
               marquez_task.latestRun.facets.airflow.task.args
                 .wait_for_completion;
@@ -691,7 +746,7 @@ function lineageCreation(parentDagId, nextTaskIds, waitForCompletion) {
                   "MATCH (downstream_task:Job{taskId:$downstreamTaskIdParam}), (next_task:Job{taskId:$nextTaskIdParam}) MERGE (downstream_task)-[:activates]->(next_task)",
                   {
                     downstreamTaskIdParam: parentDagId + "." + task.task_id,
-                    nextTaskIdParam: downStreamTask
+                    nextTaskIdParam: downStreamTask,
                   }
                 );
               });
@@ -722,6 +777,11 @@ app.get("/airflow/lineage", function (req, res) {
 app.get("/airflow/lineage/:dagId", function (req, res) {
   console.log("-------------NEW QUERY -----------------------");
   lineageCreationAsync(req.params.dagId, null);
+  res.send("ok");
+});
+app.get("/airflow/lineagecsv/:dagId", function (req, res) {
+  console.log("-------------NEW QUERY -----------------------");
+  lineageCreationCSV(req.params.dagId, null);
   res.send("ok");
 });
 
