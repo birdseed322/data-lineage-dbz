@@ -1,4 +1,4 @@
-data-lineage-dbz INSERT PROJECT SUMMARY HERE
+data-lineage-dbz is an open source project that provides 
 
 ## Quickstart
 INSERT QUICKSTART GUIDE HERE + ADD LINK TO API docs
