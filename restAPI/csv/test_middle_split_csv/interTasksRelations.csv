@@ -1,5 +1,0 @@
-SOURCE_ID,DEST_ID
-test_middle_split.middle.middle_2,test_middle_split.end
-test_middle_split.middle.middle_1,test_middle_split.end
-test_middle_split.start,test_middle_split.middle.middle_1
-test_middle_split.start,test_middle_split.middle.middle_2

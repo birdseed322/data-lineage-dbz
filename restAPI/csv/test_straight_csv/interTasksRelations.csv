@@ -1,4 +1,0 @@
-SOURCE_ID,DEST_ID
-test_straight.start,test_straight.second
-test_straight.third,test_straight.done
-test_straight.second,test_straight.third
