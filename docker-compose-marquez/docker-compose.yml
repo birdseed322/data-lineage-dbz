@@ -54,9 +54,47 @@ services:
         # source: ${PWD}/requirements.txt
         source: ./requirements.txt
         target: /bitnami/python/requirements.txt
+  # airflow_worker:
+  #   image: bitnami/airflow-worker:2
+  #   # user: root
+  #   env_file:
+  #     - openlineage.env
+  #   environment:
+  #     - AIRFLOW_FERNET_KEY=Z2uDm0ZL60fXNkEXG8LW99Ki2zf8wkmIltaTz1iQPDU=
+  #     - AIRFLOW_DATABASE_HOST=postgres
+  #     - AIRFLOW_DATABASE_NAME=airflow
+  #     - AIRFLOW_DATABASE_USERNAME=airflow
+  #     - AIRFLOW_DATABASE_PASSWORD=
+  #     - AIRFLOW_EXECUTOR=CeleryExecutor
+  #     - AIRFLOW_LOAD_EXAMPLES=no
+  #     - AIRFLOW_CONN_EXAMPLE_DB=postgres://example:example@postgres:5432/example
+  #     - AIRFLOW_WEBSERVER_HOST=airflow
+  #   volumes:
+  #     # - ./docker/entrypoint-afworker.sh:/opt/bitnami/scripts/airflow-worker/entrypoint.sh
+  #     - ./dags:/opt/bitnami/airflow/dags
+  #     - ./airflow.cfg:/opt/bitnami/airflow/airflow.cfg
+  #     - ./sparkjobs:/usr/local/spark/app
+  #     - ${PWD}/whl:/whl
+  #     - type: bind
+  #       source: ./requirements.txt
+  #       target: /bitnami/python/requirements.txt
+  # marquez:
+  #   image: marquezproject/marquez:latest
+  #   ports:
+  #     - "5000:5000"
+  #     - "5001:5001"
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
+  #   depends_on:
+  #     - postgres
+  #   entrypoint: ["./entrypoint.sh"]
+  #   # Enables SQL statement logging (see: https://www.postgresql.org/docs/12/runtime-config-logging.html#GUC-LOG-STATEMENT)
+  #   # command: ["postgres", "-c", "log_statement=all"]
   airflow_worker:
-    image: bitnami/airflow-worker:2
-    # user: root
+    build: 
+      dockerfile: ./docker/airflow-worker-spark/Dockerfile.Airflow-worker
+      context: .
     env_file:
       - openlineage.env
     environment:
@@ -70,7 +108,6 @@ services:
       - AIRFLOW_CONN_EXAMPLE_DB=postgres://example:example@postgres:5432/example
       - AIRFLOW_WEBSERVER_HOST=airflow
     volumes:
-      # - ./docker/entrypoint-afworker.sh:/opt/bitnami/scripts/airflow-worker/entrypoint.sh
       - ./dags:/opt/bitnami/airflow/dags
       - ./airflow.cfg:/opt/bitnami/airflow/airflow.cfg
       - ./sparkjobs:/usr/local/spark/app
@@ -123,7 +160,6 @@ services:
       - EXAMPLE_DB=example
     volumes:
       - ./docker/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
-
   redis:
     image: bitnami/redis:6.0.6
     environment:
