@@ -35,7 +35,13 @@ var kafkaConnect = setupKafkaConnect();
 app.use(express.json());
 
 
-//lineageCreation function implemented with Kafka for immediate graph creation
+/**
+ * Function that will construct and persist the lineage of a given Dag on Neo4j through a Kafka queue  
+ * @param {String} parentDagId - The ID of the parentDag 
+ * @param {string[]} nextTaskIds - The IDs of the immediate downstream tasks of the TriggerDagOperator task  
+ * @param {Boolean} waitForCompletion - Boolean to indicate if the TriggerDagOperator waits for the completion of triggered Dags
+ * @returns {string[]} - Array of Task IDs belonging to the roots of the current Dag
+ */
 async function lineageCreationAsync(
   parentDagId,
   nextTaskIds,

@@ -1,1 +1,4 @@
 openlineage-airflow
+apache-airflow-providers-apache-spark
+pyspark
+psycopg2-binary

@@ -1,5 +1,5 @@
 const { Kafka } = require("kafkajs");
-//KAFKA TEST
+// KAFKA TEST
 // Kafka broker connection details
 const kafkaBrokers = ["localhost:9092"];
 const kafkaTopic = "test";
@@ -11,6 +11,9 @@ const kafka = new Kafka({
 });
 const producer = kafka.producer({ allowAutoTopicCreation: true });
 
+/**
+ * Function to launch Kafka Connect and establish connection with Neo4j
+ */
 function setupKafkaConnect() {
   fetch("http://localhost:8083/connectors", {
     method: "POST",
@@ -47,6 +50,10 @@ function setupKafkaConnect() {
     });
 }
 
+/**
+ * Function to create Dag node on Neo4j
+ * @param {String} dagId - The ID of the Dag to be created
+ */
 async function createDagNode(dagId) {
   producer
     .connect()
@@ -75,6 +82,11 @@ async function createDagNode(dagId) {
     });
 }
 
+/**
+ * Function to persist "is_parent_of" relationship between Dag and Task on Neo4j
+ * @param {String} dagId - The ID of the parent Dag 
+ * @param {String} taskId - The ID of the task belonging to the parent Dag
+ */
 async function createDagTaskRelationship(dagId, taskId) {
   producer
     .connect()
@@ -116,6 +128,11 @@ async function createDagTaskRelationship(dagId, taskId) {
     });
 }
 
+/**
+ * Function to persist "activates" relationship between 2 Tasks on Neo4j to illustrate dependency
+ * @param {String} taskId1 - The ID of the upstream Task
+ * @param {String} taskId2 - The ID of the downstream Task
+ */
 async function createTaskTaskRelationship(taskId1, taskId2) {
   producer
     .connect()
