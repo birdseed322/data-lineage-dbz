@@ -33,6 +33,6 @@ with DAG(
 
     t1 = PythonOperator(task_id='start', python_callable=start)
     
-    t2 =  SparkSubmitOperator(application=default_spark_job_path, task_id="submit_job", conn_id='spark_default', conf={"spark.sql.queryExecutionListeners":"za.co.absa.spline.harvester.listener.SplineQueryExecutionListener","spark.spline.producer.url":"http://rest-server:8080/producer"}, packages="za.co.absa.spline.agent.spark:spark-3.2-spline-agent-bundle_2.12:1.1.0")
+    t2 =  SparkSubmitOperator(application=default_spark_job_path, task_id="submit_job", conn_id='spark_default', packages='za.co.absa.spline.agent.spark:spark-3.2-spline-agent-bundle_2.12:1.1.0', conf={"spark.sql.queryExecutionListeners":"za.co.absa.spline.harvester.listener.SplineQueryExecutionListener", "spark.spline.producer.url":"http://rest-server:8080/producer"})
 
 t1 >> t2
