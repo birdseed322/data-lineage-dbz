@@ -1,4 +1,3 @@
-import sys
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SparkSession
 
@@ -7,8 +6,9 @@ from pyspark.sql import SparkSession
 ##########################
 master = "spark://spark:7077"
 conf = SparkConf().setAppName("Spark Hello World").setMaster(master)
-sc = SparkContext(conf=conf)
 spark = SparkSession.builder.config(conf=conf).getOrCreate()
 
 # Print result
-print(sys.argv)
+print("This is a spark job")
+
+spark.stop()
