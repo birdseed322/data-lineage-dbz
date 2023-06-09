@@ -194,6 +194,7 @@ services:
       - SPARK_SSL_ENABLED=no
       - SPARK_USER=spark
     ports:
+      - 7000:8080
       - 7077:7077
     volumes:
       - ./sparkjobs:/usr/local/spark/app
