@@ -16,13 +16,14 @@ services:
       - AIRFLOW_DATABASE_HOST=postgres
       - AIRFLOW_DATABASE_NAME=airflow
       - AIRFLOW_DATABASE_USERNAME=airflow
-      - AIRFLOW_DATABASE_PASSWORD=airflow
+      - AIRFLOW_DATABASE_PASSWORD=
       - AIRFLOW_EXECUTOR=CeleryExecutor
       - AIRFLOW_LOAD_EXAMPLES=no
       - AIRFLOW_CONN_EXAMPLE_DB=postgres://example:example@postgres:5432/example
     volumes:
       - ./dags:/opt/bitnami/airflow/dags
       - ./airflow.cfg:/opt/bitnami/airflow/airflow.cfg
+      - ./sparkjobs:/usr/local/spark/app
       - /whl:/whl
       - type: bind
         # source: ${PWD}/requirements.txt
@@ -38,7 +39,7 @@ services:
       - AIRFLOW_DATABASE_HOST=postgres
       - AIRFLOW_DATABASE_NAME=airflow
       - AIRFLOW_DATABASE_USERNAME=airflow
-      - AIRFLOW_DATABASE_PASSWORD=airflow
+      - AIRFLOW_DATABASE_PASSWORD=
       - AIRFLOW_EXECUTOR=CeleryExecutor
       - AIRFLOW_LOAD_EXAMPLES=no
       - AIRFLOW_CONN_EXAMPLE_DB=postgres://example:example@postgres:5432/example
@@ -46,13 +47,15 @@ services:
     volumes:
       - ./dags:/opt/bitnami/airflow/dags
       - ./airflow.cfg:/opt/bitnami/airflow/airflow.cfg
+      - ./sparkjobs:/usr/local/spark/app
       - ./whl:/whl
       - type: bind
         source: ./requirements.txt
         target: /bitnami/python/requirements.txt
-
   airflow_worker:
-    image: bitnami/airflow-worker:2
+    build:
+      dockerfile: ./docker/airflow-worker-spark/Dockerfile.Airflow-worker
+      context: .
     env_file:
       - openlineage.env
     environment:
@@ -60,7 +63,7 @@ services:
       - AIRFLOW_DATABASE_HOST=postgres
       - AIRFLOW_DATABASE_NAME=airflow
       - AIRFLOW_DATABASE_USERNAME=airflow
-      - AIRFLOW_DATABASE_PASSWORD=airflow
+      - AIRFLOW_DATABASE_PASSWORD=
       - AIRFLOW_EXECUTOR=CeleryExecutor
       - AIRFLOW_LOAD_EXAMPLES=no
       - AIRFLOW_CONN_EXAMPLE_DB=postgres://example:example@postgres:5432/example
@@ -68,12 +71,11 @@ services:
     volumes:
       - ./dags:/opt/bitnami/airflow/dags
       - ./airflow.cfg:/opt/bitnami/airflow/airflow.cfg
-      - /whl:/whl
+      - ./sparkjobs:/usr/local/spark/app
+      - ${PWD}/whl:/whl
       - type: bind
         source: ./requirements.txt
-        # source: ${PWD}/requirements.txt
         target: /bitnami/python/requirements.txt
-
   marquez:
     image: marquezproject/marquez:latest
     ports:
@@ -119,7 +121,6 @@ services:
       - EXAMPLE_DB=example
     volumes:
       - ./docker/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
-
   redis:
     image: bitnami/redis:6.0.6
     environment:
@@ -193,9 +194,10 @@ services:
       - SPARK_SSL_ENABLED=no
       - SPARK_USER=spark
     ports:
-      - 7000:8080
+      - 7077:7077
     volumes:
-      - ./spark-jobs:/opt/bitnami/spark/data
+      - ./sparkjobs:/usr/local/spark/app
+
   spark-worker:
     image: docker.io/bitnami/spark:3.2.4
     environment:
@@ -209,7 +211,9 @@ services:
       - SPARK_SSL_ENABLED=no
       - SPARK_USER=spark
     volumes:
-      - ./spark-jobs:/opt/bitnami/spark/data
+      - ./sparkjobs:/usr/local/spark/app
+    depends_on:
+      - spark
 
   arangodb:
     image: arangodb:latest
