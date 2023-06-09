@@ -24,9 +24,8 @@ services:
       - ./dags:/opt/bitnami/airflow/dags
       - ./airflow.cfg:/opt/bitnami/airflow/airflow.cfg
       - ./sparkjobs:/usr/local/spark/app
-      - /whl:/whl
+      # - /whl:/whl
       - type: bind
-        # source: ${PWD}/requirements.txt
         source: ./requirements.txt
         target: /bitnami/python/requirements.txt
 
@@ -72,7 +71,7 @@ services:
       - ./dags:/opt/bitnami/airflow/dags
       - ./airflow.cfg:/opt/bitnami/airflow/airflow.cfg
       - ./sparkjobs:/usr/local/spark/app
-      - ${PWD}/whl:/whl
+      # - ${PWD}/whl:/whl
       - type: bind
         source: ./requirements.txt
         target: /bitnami/python/requirements.txt
@@ -133,11 +132,11 @@ services:
       - 7474:7474
       - 7687:7687
     volumes:
-      - ./conf:/conf
-      - ./data:/data
-      - ./import:/import
-      - ./logs:/logs
-      - ./plugins:/plugins
+      - ./neo4j-server/conf:/conf
+      - ./neo4j-server/data:/data
+      - ./neo4j-server/import:/import
+      - ./neo4j-server/logs:/logs
+      - ./neo4j-server/plugins:/plugins
     environment:
       # Raise memory limits
       - NEO4J_dbms_memory_pagecache_size=1G
@@ -194,8 +193,10 @@ services:
       - SPARK_SSL_ENABLED=no
       - SPARK_USER=spark
     ports:
+      - 7000:8080
       - 7077:7077
     volumes:
+      # - ./sparkjobs:/usr/local/spark/app
       - ./sparkjobs:/usr/local/spark/app
 
   spark-worker:
@@ -232,24 +233,24 @@ services:
       SPLINE_DATABASE_CONNECTION_URL: "arangodb://arangodb/spline"
       # by default /dev/random is used which may block
       CATALINA_OPTS: "-Dsecurerandom.source=file:/dev/./urandom -Djava.security.egd=file:/dev/./urandom"
-    depends_on:
-      db-init:
-        condition: service_completed_successfully
+      # depends_on:
+      #   db-init:
+      #     condition: service_completed_successfully
 
-  db-init:
-    image: absaoss/spline-admin:latest
-    restart: on-failure
-    entrypoint: >
-      tini -g -- bash -c "
-        until curl --output /dev/null --silent --get --fail http://arangodb:8529/_admin/server/availability
-        do
-          echo waiting for ArangoDB server to be ready...
-          sleep 5
-        done
-        bash ./entrypoint.sh db-init arangodb://arangodb/spline -s
-      "
-    depends_on:
-      - arangodb
+  # db-init:
+  #   image: absaoss/spline-admin:latest
+  #   restart: on-failure
+  #   entrypoint: >
+  #     tini -g -- bash -c "
+  #       until curl --output /dev/null --silent --get --fail http://arangodb:8529/_admin/server/availability
+  #       do
+  #         echo waiting for ArangoDB server to be ready...
+  #         sleep 5
+  #       done
+  #       bash ./entrypoint.sh db-init arangodb://arangodb/spline -s
+  #     "
+  #   depends_on:
+  #     - arangodb
 
   ui:
     image: absaoss/spline-web-ui:latest
