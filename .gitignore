@@ -6,3 +6,4 @@ docker-compose-marquez/kafka/kafka/
 docker-compose-marquez/dags/__pycache__/
 restAPI/csv/
 docker-compose-marquez/import/
+docker-compose-marquez/spark-jobs/output
