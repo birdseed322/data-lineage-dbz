@@ -11,8 +11,8 @@ const {
   setupKafkaConnect,
   createDagNode,
   createDagTaskRelationship,
-  createTaskTaskRelationship
-} = require("./helper_functions/kafka-helper-functions")
+  createTaskTaskRelationship,
+} = require("./helper_functions/kafka-helper-functions");
 const express = require("express");
 const app = express();
 const marquez_backend = "http://localhost:5000/api/v1/";
@@ -34,11 +34,10 @@ var kafkaConnect = setupKafkaConnect();
 //Dependencies
 app.use(express.json());
 
-
 /**
- * Function that will construct and persist the lineage of a given Dag on Neo4j through a Kafka queue  
- * @param {String} parentDagId - The ID of the parentDag 
- * @param {string[]} nextTaskIds - The IDs of the immediate downstream tasks of the TriggerDagOperator task  
+ * Function that will construct and persist the lineage of a given Dag on Neo4j through a Kafka queue
+ * @param {String} parentDagId - The ID of the parentDag
+ * @param {string[]} nextTaskIds - The IDs of the immediate downstream tasks of the TriggerDagOperator task
  * @param {Boolean} waitForCompletion - Boolean to indicate if the TriggerDagOperator waits for the completion of triggered Dags
  * @returns {string[]} - Array of Task IDs belonging to the roots of the current Dag
  */
@@ -137,16 +136,22 @@ async function lineageCreationAsync(
               });
             }
           })
-          .catch(err => console.log("Marquez API call failed: " + err));
+          .catch((err) => console.log("Marquez API call failed: " + err));
         fetchPromises.push(fetchPromise);
       });
       return Promise.all(fetchPromises).then(() => roots);
     })
-    .catch(err => console.log("Airflow API call failed"));
+    .catch((err) => console.log("Airflow API call failed"));
 }
 
-//lineageCreation function implemented with CSV
+/**
+ * Creates CSV files describing nodes and relaltionships which are directly imported to Neo4j.
+ * @param {String} parentDagId - The ID of the parent DAG.
+ * @param {string[]} nextParentTaskIds - Array of IDs of the next immediate tasks of a node that triggers a downstream DAG.
+ * @returns {string[]} Array of root nodes in a DAG.
+ */
 async function lineageCreationCSV(parentDagId, nextParentTaskIds) {
+  //Arrays that will be written to the CSV files.
   const rootsArr = [];
   const dagArr = [{ dag_id: parentDagId }];
   const tasksArr = [];
@@ -261,21 +266,8 @@ async function lineageCreationCSV(parentDagId, nextParentTaskIds) {
   return rootsArr;
 }
 
-
 app.get("/", function (req, res) {
   res.send("Landing Page");
-});
-
-//Traffic redirected to leverage Marquez lineage tech
-app.get("/airflow/lineage", function (req, res) {
-  console.log(req.query.nodeId);
-  fetch(marquez_backend + "lineage?nodeId=" + req.query.nodeId).then(
-    (result) => {
-      result.json().then((lin) => {
-        console.log(lin);
-      });
-    }
-  );
 });
 
 app.get("/airflow/lineage/:dagId", function (req, res) {
