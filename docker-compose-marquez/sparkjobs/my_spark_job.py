@@ -7,7 +7,7 @@ spark = SparkSession.builder.appName("MySparkJob").getOrCreate()
 locations = (
     spark.read.option("header", "true")
     .option("inferschema", "true")
-    .csv("file:///opt/bitnami/spark/input/locations.csv")
+    .csv("file:///usr/local/spark/app/input/locations.csv")
 )
 locations.createOrReplaceTempView("locations")
 
@@ -15,7 +15,7 @@ locations.createOrReplaceTempView("locations")
 user_favorites = (
     spark.read.option("header", "true")
     .option("inferschema", "true")
-    .csv("file:///opt/bitnami/spark/input/user_favorites.csv")
+    .csv("file:///usr/local/spark/app/input/user_favorites.csv")
 )
 user_favorites.createOrReplaceTempView("user_favorites")
 
@@ -35,5 +35,5 @@ ON user_favorites.favorite_city = locations.city
 """)
 
 # Write output and print final DataFrame to console
-nicknames.write.mode("overwrite").csv("file:///opt/bitnami/spark/output/nicknames")
+nicknames.write.mode("overwrite").csv("file:///usr/local/spark/app/output/nicknames")
 nicknames.show(20, False)
