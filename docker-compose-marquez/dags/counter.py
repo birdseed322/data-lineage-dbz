@@ -38,7 +38,7 @@ t2 = PostgresOperator(
     postgres_conn_id='postgres_default',
     sql='''
     INSERT INTO counts (value)
-         VALUES (5)
+         VALUES (5);
     ''',
     dag=dag
 )

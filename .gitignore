@@ -7,3 +7,4 @@ docker-compose-marquez/dags/__pycache__/
 restAPI/csv/
 docker-compose-marquez/neo4j-server/import/
 docker-compose-marquez/sparkjobs/output/
+docker-compose-marquez/sparkjobs/metastore_db/
