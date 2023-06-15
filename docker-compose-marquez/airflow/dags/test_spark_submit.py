@@ -34,7 +34,7 @@ with DAG(
     t1 = PythonOperator(task_id='start', python_callable=start)
     
     t2 =  SparkSubmitOperator(application=default_spark_job_path, task_id="submit_job",
-                              name="testing", conn_id='spark_default',
+                              name="my_spark_job", conn_id='spark_default',
                               packages='io.openlineage:openlineage-spark:0.27.2',
                               conf={"spark.openlineage.transport.url":"http://marquez:5000/api/v1/namespaces/example/",
                                      "spark.openlineage.transport.type":"http",

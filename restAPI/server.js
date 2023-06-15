@@ -12,6 +12,11 @@ const {
   createDagNode,
   createDagTaskRelationship,
   createTaskTaskRelationship,
+  createSparkJobNode,
+  createTaskSparkJobRelationship,
+  createSparkJobSparkTaskRelationship,
+  createDatasetToSparkTaskRelationship,
+  createSparkTaskToDatasetRelationship
 } = require("./helper_functions/kafka-helper-functions");
 const express = require("express");
 const app = express();
@@ -33,6 +38,13 @@ var kafkaConnect = setupKafkaConnect();
 
 //Dependencies
 app.use(express.json());
+
+//ExtractJobName from nodeId
+function extractJobName(inputString) {
+  const parts = inputString.split(':');
+  const jobName = parts[parts.length - 1];
+  return jobName;
+}
 
 /**
  * Function that will construct and persist the lineage of a given Dag on Neo4j through a Kafka queue
@@ -72,7 +84,7 @@ async function lineageCreationAsync(
           task.downstream_task_ids.length == 0 &&
           nextTaskIds != null
         ) {
-          //Create link in neo4j with nextTaskIds
+          //Create link in with nextTaskIds
           nextTaskIds.map(async (nextTaskId) => {
             await createTaskTaskRelationship(
               parentDagId + "." + task.task_id,
@@ -266,24 +278,176 @@ async function lineageCreationCSV(parentDagId, nextParentTaskIds) {
   return rootsArr;
 }
 
+async function lineageCreationAsyncSpark(
+  parentDagId,
+  nextTaskIds,
+  waitForCompletion
+) {
+  var roots = [];
+  await createDagNode(parentDagId);
+  return fetch(airflow_backend + "dags/" + parentDagId + "/tasks", {
+    headers: {
+      Authorization: "Basic " + btoa(airflow_user + ":" + airflow_password),
+    },
+  })
+    .then((result) => {
+      return result.json();
+    })
+    .then((dag) => {
+      const fetchPromises = [];
+      dag.tasks.forEach(async (task) => {
+        //rename
+        task.downstream_task_ids.forEach(
+          (x, index) =>
+            (task.downstream_task_ids[index] = parentDagId + "." + x)
+        );
+        //Create nodes
+        await createDagTaskRelationship(parentDagId, task.task_id);
+
+        if (
+          waitForCompletion &&
+          task.downstream_task_ids.length == 0 &&
+          nextTaskIds != null
+        ) {
+          //Create link in neo4j with nextTaskIds
+          nextTaskIds.map(async (nextTaskId) => {
+            await createTaskTaskRelationship(
+              parentDagId + "." + task.task_id,
+              nextTaskId
+            );
+          });
+        }
+      });
+      dag.tasks.forEach(async (task) => {
+        const fetchPromise = fetch(
+          marquez_backend +
+            "namespaces/example/jobs/" + //"example" to be replaced
+            parentDagId +
+            "." +
+            task.task_id
+        )
+          .then((marquez_task_result) => marquez_task_result.json())
+          .then(async (marquez_task) => {
+            //Since Marquez API returns a string, 2 represents an empty list
+            if (
+              marquez_task.latestRun.facets.airflow.task.upstream_task_ids
+                .length == 2
+            ) {
+              roots.push(parentDagId + "." + task.task_id);
+            }
+            const wait_for_completion =
+              marquez_task.latestRun.facets.airflow.task.args
+                .wait_for_completion;
+
+            if (task.operator_name == "TriggerDagRunOperator") {
+              if (!wait_for_completion) {
+                task.downstream_task_ids.map(async (downStreamTask) => {
+                  await createTaskTaskRelationship(
+                    parentDagId + "." + task.task_id,
+                    downStreamTask
+                  );
+                });
+              }
+              const target_dag_id =
+                marquez_task.latestRun.facets.airflow.task.args.trigger_dag_id;
+              fetchPromises.push(
+                await lineageCreationAsync(
+                  target_dag_id,
+                  task.downstream_task_ids,
+                  wait_for_completion
+                ).then((downstream_roots) => {
+                  downstream_roots.map(async (root_task_id) => {
+                    await createTaskTaskRelationship(
+                      parentDagId + "." + task.task_id,
+                      root_task_id
+                    );
+                  });
+                })
+              );
+              } else if (task.operator_name == "SparkSubmitOperator") {
+                const spark_job_name = marquez_task.latestRun.facets.airflow.task._name
+                //May need to insert parser to convert name into spark name format (all lowercase and underscores)
+                //Insert function to create spark job node here on Neo4j
+                await createSparkJobNode(spark_job_name)
+                await createTaskSparkJobRelationship(parentDagId + "." + task.task_id, spark_job_name)
+                fetch(marquez_backend + 'search?q=' + spark_job_name + '.%').then((spark_tasks_res) => {
+                  spark_tasks_res.json().then((spark_tasks) => {
+                    var a_spark_task_nodeId = spark_tasks.results[0].nodeId
+                    spark_tasks.results.forEach(async (spark_task) => {
+                      //Create Node for spark_task
+                      //Create association with spark_job_name node (parent)
+                      await createSparkJobSparkTaskRelationship(spark_job_name, spark_task.name)
+                    })
+                    //Depth of lineage graph is defaulted to 20
+                    fetch(marquez_backend + 'lineage?nodeId=' + a_spark_task_nodeId).then((lineage_result_res) => {
+                      lineage_result_res.json().then((lineage_result) => {
+                        lineage_result.graph.forEach((lineage_node) => {
+                          if (lineage_node.type == "DATASET") {
+                            lineage_node.inEdges.forEach(async (edge) => {
+                              //Create RS between origin and destination
+                              await createSparkTaskToDatasetRelationship(extractJobName(edge.origin), extractJobName(edge.destination))
+                            })
+                            lineage_node.outEdges.forEach(async (edge) => {
+                              //Create RS between origin and destination
+                              await createDatasetToSparkTaskRelationship(extractJobName(edge.origin), extractJobName(edge.destination))
+                            })
+                          } else if (lineage_node.type == "JOB") {
+                            lineage_node.inEdges.forEach(async (edge) => {
+                              //Create RS between origin and destination
+                              await createDatasetToSparkTaskRelationship(extractJobName(edge.origin), extractJobName(edge.destination))
+                            })
+                            lineage_node.outEdges.forEach(async (edge) => {
+                              //Create RS between origin and destination
+                              await createSparkTaskToDatasetRelationship(extractJobName(edge.origin), extractJobName(edge.destination))
+                            })
+                          }
+                        })
+                      })
+                    })
+                  })
+                })
+            } else {
+              task.downstream_task_ids.map(async (downStreamTask) => {
+                await createTaskTaskRelationship(
+                  parentDagId + "." + task.task_id,
+                  downStreamTask
+                );
+              });
+            }
+          })
+          .catch((err) => console.log("Marquez API call failed: " + err));
+        fetchPromises.push(fetchPromise);
+      });
+      return Promise.all(fetchPromises).then(() => roots);
+    })
+    .catch((err) => console.log("Airflow API call failed"));
+}
+
+
 app.get("/", function (req, res) {
   res.send("Landing Page");
 });
 
-app.get("/airflow/lineage/:dagId", function (req, res) {
-  console.log("-------------NEW QUERY -----------------------");
+app.get("/airflow/lineageasync/:dagId", function (req, res) {
+  console.log("-------------NEW QUERY (ASYNC) -----------------------");
   lineageCreationAsync(req.params.dagId, null);
-  res.send("ok");
+  res.send("Called lineageCreationAsync");
 });
 
 app.get("/airflow/lineagecsv/:dagId", function (req, res) {
-  console.log("-------------NEW QUERY -----------------------");
+  console.log("-------------NEW QUERY (CSV) -----------------------");
   try {
     lineageCreationCSV(req.params.dagId, null);
     res.send("Called lineageCreationCsv");
   } catch (err) {
     console.log(err);
   }
+});
+
+app.get("/airflow/lineageasyncspark/:dagId", function (req, res) {
+  console.log("-------------NEW QUERY (ASYNC SPARK) -----------------------");
+  lineageCreationAsyncSpark(req.params.dagId, null);
+  res.send("Called lineageCreationAsyncSpark");
 });
 
 app.listen(3001, function () {

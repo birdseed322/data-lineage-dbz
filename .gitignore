@@ -3,8 +3,9 @@ restAPI/node_modules/
 docker-compose-marquez/neo4j-server/data/
 docker-compose-marquez/neo4j-server/logs/
 docker-compose-marquez/kafka/kafka/
-docker-compose-marquez/dags/__pycache__/
+docker-compose-marquez/airflow/dags/__pycache__/
 restAPI/csv/
 docker-compose-marquez/neo4j-server/import/
 docker-compose-marquez/sparkjobs/output/
 docker-compose-marquez/sparkjobs/metastore_db/
+docker-compose-marquez/dags/__pycache__

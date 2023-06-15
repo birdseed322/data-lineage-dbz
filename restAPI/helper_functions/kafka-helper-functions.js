@@ -174,9 +174,207 @@ async function createTaskTaskRelationship(taskId1, taskId2) {
     });
 }
 
+async function createSparkJobNode(sparkJobId) {
+  producer
+    .connect()
+    .then(() => {
+      console.log("SENDING CREATESPARKJOB MESSAGE TO Q");
+      producer.send({
+        topic: "test",
+        messages: [
+          {
+            value: JSON.stringify({
+              op: "merge",
+              properties: {
+                sparkJobId,
+              },
+              ids: { sparkJobId },
+              labels: ["Spark Job"],
+              type: "node",
+              detach: true,
+            }),
+          },
+        ],
+      });
+    })
+    .catch((err) => {
+      console.log("Error when creating: " + sparkJobId + " Error message: " + err);
+    });
+}
+
+async function createTaskSparkJobRelationship(taskId, sparkJobId){
+  producer
+    .connect()
+    .then(() => {
+      console.log("SENDING CREATETASKSPARKJOBRS MESSAGE TO Q");
+      producer.send({
+        topic: "test",
+        messages: [
+          {
+            value: JSON.stringify({
+              op: "merge",
+              properties: {},
+              rel_type: "activates",
+              from: {
+                ids: { taskId },
+                labels: ["Job"],
+                op: "merge",
+              },
+              to: {
+                ids: { sparkJobId },
+                labels: ["Spark Job"],
+                op: "merge",
+              },
+              type: "relationship",
+            }),
+          },
+        ],
+      });
+    })
+    .catch((err) => {
+      console.log(
+        "Error when creating: " +
+          taskId +
+          " to " +
+          sparkJobId +
+          " Error message: " +
+          err
+      );
+    });
+}
+
+async function createSparkJobSparkTaskRelationship(parentSparkJobId, sparkTaskId){
+  producer
+    .connect()
+    .then(() => {
+      console.log("SENDING CREATESPARKJOBSPARKTASKRS MESSAGE TO Q");
+      producer.send({
+        topic: "test",
+        messages: [
+          {
+            value: JSON.stringify({
+              op: "merge",
+              properties: {},
+              rel_type: "parent_of",
+              from: {
+                ids: { sparkJobId: parentSparkJobId },
+                labels: ["Spark Job"],
+                op: "merge",
+              },
+              to: {
+                ids: { sparkTaskId: sparkTaskId },
+                labels: ["Spark Task"],
+                op: "merge",
+              },
+              type: "relationship",
+            }),
+          },
+        ],
+      });
+    })
+    .catch((err) => {
+      console.log(
+        "Error when creating: " +
+          parentSparkJobId +
+          " to " +
+          sparkTaskId +
+          " Error message: " +
+          err
+      );
+    });
+}
+
+async function createDatasetToSparkTaskRelationship(datasetId, sparkTaskId) {
+  producer
+    .connect()
+    .then(() => {
+      console.log("SENDING CREATEDATASETTOSPARKTASKRS MESSAGE TO Q");
+      producer.send({
+        topic: "test",
+        messages: [
+          {
+            value: JSON.stringify({
+              op: "merge",
+              properties: {},
+              rel_type: "used_in",
+              from: {
+                ids: { datasetId },
+                labels: ["Dataset"],
+                op: "merge",
+              },
+              to: {
+                ids: { sparkTaskId },
+                labels: ["Spark Task"],
+                op: "merge",
+              },
+              type: "relationship",
+            }),
+          },
+        ],
+      });
+    })
+    .catch((err) => {
+      console.log(
+        "Error when creating: " +
+          datasetId +
+          " to " +
+          sparkTaskId +
+          " Error message: " +
+          err
+      );
+    });
+}
+
+async function createSparkTaskToDatasetRelationship(sparkTaskId, datasetId) {
+  producer
+    .connect()
+    .then(() => {
+      console.log("SENDING CREATESPARKTASKDATASETRS MESSAGE TO Q");
+      producer.send({
+        topic: "test",
+        messages: [
+          {
+            value: JSON.stringify({
+              op: "merge",
+              properties: {},
+              rel_type: "outputs_to",
+              from: {
+                ids: { sparkTaskId },
+                labels: ["Spark Task"],
+                op: "merge",
+              },
+              to: {
+                ids: { datasetId },
+                labels: ["Dataset"],
+                op: "merge",
+              },
+              type: "relationship",
+            }),
+          },
+        ],
+      });
+    })
+    .catch((err) => {
+      console.log(
+        "Error when creating: " +
+          sparkTaskId +
+          " to " +
+          datasetId +
+          " Error message: " +
+          err
+      );
+    });
+}
+
+
 module.exports = {
   setupKafkaConnect,
   createDagNode,
   createDagTaskRelationship,
-  createTaskTaskRelationship
+  createTaskTaskRelationship,
+  createSparkJobNode,
+  createSparkJobSparkTaskRelationship,
+  createTaskSparkJobRelationship,
+  createDatasetToSparkTaskRelationship,
+  createSparkTaskToDatasetRelationship
 };
