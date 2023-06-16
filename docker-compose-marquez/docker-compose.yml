@@ -120,6 +120,7 @@ services:
       - EXAMPLE_DB=example
     volumes:
       - ./docker/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+      - ./sparkjobs:/var/lib/postgresql/data
   redis:
     image: bitnami/redis:6.0.6
     environment:
@@ -217,3 +218,52 @@ services:
       - ./sparkjobs:/usr/local/spark/app
     depends_on:
       - spark
+
+  # arangodb:
+  #   image: arangodb:latest
+  #   restart: on-failure
+  #   ports:
+  #     - 8530:8529
+  #   environment:
+  #     ARANGO_NO_AUTH: 1
+
+  # rest-server:
+  #   image: absaoss/spline-rest-server:latest
+  #   restart: on-failure
+  #   ports:
+  #     - 9000:8080
+  #   environment:
+  #     SPLINE_DATABASE_CONNECTION_URL: "arangodb://arangodb/spline"
+  #     # by default /dev/random is used which may block
+  #     CATALINA_OPTS: "-Dsecurerandom.source=file:/dev/./urandom -Djava.security.egd=file:/dev/./urandom"
+  #   depends_on:
+  #     db-init:
+  #       condition: service_completed_successfully
+
+  # db-init:
+  #   image: absaoss/spline-admin:latest
+  #   restart: on-failure
+  #   entrypoint: >
+  #     tini -g -- bash -c "
+  #       until curl --output /dev/null --silent --get --fail http://arangodb:8529/_admin/server/availability
+  #       do
+  #         echo waiting for ArangoDB server to be ready...
+  #         sleep 5
+  #       done
+  #       bash ./entrypoint.sh db-init arangodb://arangodb/spline -s
+  #     "
+  #   depends_on:
+  #     - arangodb
+
+  # ui:
+  #   image: absaoss/spline-web-ui:latest
+  #   restart: on-failure
+  #   environment:
+  #     # The consumer URL is used by the web browser
+  #     SPLINE_CONSUMER_URL: "http://${DOCKER_HOST_EXTERNAL:-localhost}:9000/consumer"
+  #     # by default /dev/random is used which may block
+  #     CATALINA_OPTS: "-Dsecurerandom.source=file:/dev/./urandom -Djava.security.egd=file:/dev/./urandom"
+  #   ports:
+  #     - 9090:8080
+  #   depends_on:
+  #     - rest-server
