@@ -580,6 +580,9 @@ app.get("/airflow/tablelineagetask/:taskId", function (req, res) {
  * Sample of dataset queries:
  * http://localhost:5000/api/v1/lineage?nodeId=dataset:postgres://postgres:5432/airflow:page_categories
  * http://localhost:5000/api/v1/lineage?nodeId=dataset:file:/usr/local/spark/app/output/result2.parquet
+ *
+ * But query does not process when the following endpoint is called
+ * http://localhost:3001/airflow/tablelineagedataset/file:/usr/local/spark/app/output/result2.parquet
  **/
 //NOT WORKING AT THE MOMENT.
 app.get("/airflow/tablelineagedataset/:datasetId", function (req, res) {
