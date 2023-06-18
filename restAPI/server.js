@@ -16,7 +16,9 @@ const {
   createTaskSparkJobRelationship,
   createSparkJobSparkTaskRelationship,
   createDatasetToSparkTaskRelationship,
-  createSparkTaskToDatasetRelationship
+  createSparkTaskToDatasetRelationship,
+  createDatasetToTaskRelationship,
+  createTaskToDatasetRelationship,
 } = require("./helper_functions/kafka-helper-functions");
 const express = require("express");
 const app = express();
@@ -41,7 +43,7 @@ app.use(express.json());
 
 //ExtractJobName from nodeId
 function extractJobName(inputString) {
-  const parts = inputString.split(':');
+  const parts = inputString.split(":");
   const jobName = parts[parts.length - 1];
   return jobName;
 }
@@ -364,48 +366,71 @@ async function lineageCreationAsyncSpark(
                   });
                 })
               );
-              } else if (task.operator_name == "SparkSubmitOperator") {
-                const spark_job_name = marquez_task.latestRun.facets.airflow.task._name
-                //May need to insert parser to convert name into spark name format (all lowercase and underscores)
-                //Insert function to create spark job node here on Neo4j
-                await createSparkJobNode(spark_job_name)
-                await createTaskSparkJobRelationship(parentDagId + "." + task.task_id, spark_job_name)
-                fetch(marquez_backend + 'search?q=' + spark_job_name + '.%').then((spark_tasks_res) => {
+            } else if (task.operator_name == "SparkSubmitOperator") {
+              const spark_job_name =
+                marquez_task.latestRun.facets.airflow.task._name;
+              //May need to insert parser to convert name into spark name format (all lowercase and underscores)
+              //Insert function to create spark job node here on Neo4j
+              await createSparkJobNode(spark_job_name);
+              await createTaskSparkJobRelationship(
+                parentDagId + "." + task.task_id,
+                spark_job_name
+              );
+              fetch(marquez_backend + "search?q=" + spark_job_name + ".%").then(
+                (spark_tasks_res) => {
                   spark_tasks_res.json().then((spark_tasks) => {
-                    var a_spark_task_nodeId = spark_tasks.results[0].nodeId
+                    var a_spark_task_nodeId = spark_tasks.results[0].nodeId;
                     spark_tasks.results.forEach(async (spark_task) => {
                       //Create Node for spark_task
                       //Create association with spark_job_name node (parent)
-                      await createSparkJobSparkTaskRelationship(spark_job_name, spark_task.name)
-                    })
+                      await createSparkJobSparkTaskRelationship(
+                        spark_job_name,
+                        spark_task.name
+                      );
+                    });
                     //Depth of lineage graph is defaulted to 20
-                    fetch(marquez_backend + 'lineage?nodeId=' + a_spark_task_nodeId).then((lineage_result_res) => {
+                    fetch(
+                      marquez_backend + "lineage?nodeId=" + a_spark_task_nodeId
+                    ).then((lineage_result_res) => {
                       lineage_result_res.json().then((lineage_result) => {
                         lineage_result.graph.forEach((lineage_node) => {
                           if (lineage_node.type == "DATASET") {
                             lineage_node.inEdges.forEach(async (edge) => {
                               //Create RS between origin and destination
-                              await createSparkTaskToDatasetRelationship(extractJobName(edge.origin), extractJobName(edge.destination))
-                            })
+                              await createSparkTaskToDatasetRelationship(
+                                extractJobName(edge.origin),
+                                extractJobName(edge.destination)
+                              );
+                            });
                             lineage_node.outEdges.forEach(async (edge) => {
                               //Create RS between origin and destination
-                              await createDatasetToSparkTaskRelationship(extractJobName(edge.origin), extractJobName(edge.destination))
-                            })
+                              await createDatasetToSparkTaskRelationship(
+                                extractJobName(edge.origin),
+                                extractJobName(edge.destination)
+                              );
+                            });
                           } else if (lineage_node.type == "JOB") {
                             lineage_node.inEdges.forEach(async (edge) => {
                               //Create RS between origin and destination
-                              await createDatasetToSparkTaskRelationship(extractJobName(edge.origin), extractJobName(edge.destination))
-                            })
+                              await createDatasetToSparkTaskRelationship(
+                                extractJobName(edge.origin),
+                                extractJobName(edge.destination)
+                              );
+                            });
                             lineage_node.outEdges.forEach(async (edge) => {
                               //Create RS between origin and destination
-                              await createSparkTaskToDatasetRelationship(extractJobName(edge.origin), extractJobName(edge.destination))
-                            })
+                              await createSparkTaskToDatasetRelationship(
+                                extractJobName(edge.origin),
+                                extractJobName(edge.destination)
+                              );
+                            });
                           }
-                        })
-                      })
-                    })
-                  })
-                })
+                        });
+                      });
+                    });
+                  });
+                }
+              );
             } else {
               task.downstream_task_ids.map(async (downStreamTask) => {
                 await createTaskTaskRelationship(
@@ -423,6 +448,88 @@ async function lineageCreationAsyncSpark(
     .catch((err) => console.log("Airflow API call failed"));
 }
 
+async function tableLineageCreationTask(taskId) {
+  //example namespace to be configured later
+  console.log(`${marquez_backend}lineage?nodeId=job:example:${taskId}`);
+  fetch(`${marquez_backend}lineage?nodeId=job:example:${taskId}`).then(
+    (result) => {
+      result.json().then((json) => {
+        json.graph.forEach((node) => {
+          if (node.type == "DATASET") {
+            node.inEdges.forEach(async (edge) => {
+              await createTaskToDatasetRelationship(
+                extractJobName(edge.origin),
+                extractJobName(edge.destination)
+              );
+            });
+            node.outEdges.forEach(async (edge) => {
+              //Create RS between origin and destination
+              await createDatasetToTaskRelationship(
+                extractJobName(edge.origin),
+                extractJobName(edge.destination)
+              );
+            });
+          } else if (node.type == "JOB") {
+            node.inEdges.forEach(async (edge) => {
+              //Create RS between origin and destination
+              await createDatasetToSparkTaskRelationship(
+                extractJobName(edge.origin),
+                extractJobName(edge.destination)
+              );
+            });
+            node.outEdges.forEach(async (edge) => {
+              //Create RS between origin and destination
+              await createSparkTaskToDatasetRelationship(
+                extractJobName(edge.origin),
+                extractJobName(edge.destination)
+              );
+            });
+          }
+        });
+      });
+    }
+  );
+}
+async function tableLineageCreationDataset(datasetId) {
+  fetch(`${marquez_backend}lineage?nodeId=dataset:${datasetId}`).then(
+    (result) => {
+      result.json().then((json) => {
+        json.graph.forEach((node) => {
+          if (node.type == "DATASET") {
+            node.inEdges.forEach(async (edge) => {
+              await createTaskToDatasetRelationship(
+                extractJobName(edge.origin),
+                extractJobName(edge.destination)
+              );
+            });
+            node.outEdges.forEach(async (edge) => {
+              //Create RS between origin and destination
+              await createDatasetToTaskRelationship(
+                extractJobName(edge.origin),
+                extractJobName(edge.destination)
+              );
+            });
+          } else if (node.type == "JOB") {
+            node.inEdges.forEach(async (edge) => {
+              //Create RS between origin and destination
+              await createDatasetToSparkTaskRelationship(
+                extractJobName(edge.origin),
+                extractJobName(edge.destination)
+              );
+            });
+            node.outEdges.forEach(async (edge) => {
+              //Create RS between origin and destination
+              await createSparkTaskToDatasetRelationship(
+                extractJobName(edge.origin),
+                extractJobName(edge.destination)
+              );
+            });
+          }
+        });
+      });
+    }
+  );
+}
 
 app.get("/", function (req, res) {
   res.send("Landing Page");
@@ -449,6 +556,40 @@ app.get("/airflow/lineageasyncspark/:dagId", function (req, res) {
   lineageCreationAsyncSpark(req.params.dagId, null);
   res.send("Called lineageCreationAsyncSpark");
 });
+
+//param in this function must be in the format {dagName}.{dagTaskName} (assume namespace is 'example')
+app.get("/airflow/tablelineagetask/:taskId", function (req, res) {
+  console.log(
+    "-------------NEW QUERY (TABLE LINEAGE VIA TASKID) -----------------------"
+  );
+  tableLineageCreationTask(req.params.taskId);
+  res.send("Called tableLineageCreationTask");
+});
+
+/**
+ * Dataset has to be in the form of {namespace}:{table name} (if taken from db) / {path to file} (if local file)
+ * The 2 kinds of datasets will have 2 different namespaces (e.g 'file' / 'postgres://postgres:5432/airflow')
+ * The issue is
+ * 1) Querying what namespace a dataset belongs to
+ * 2) Putting the parameters within the endpoint (I suspect the '/' slashes messes up the endpoint)
+ * May have to implement as an input parameter
+ * Sample of dataset queries:
+ * http://localhost:5000/api/v1/lineage?nodeId=dataset:postgres://postgres:5432/airflow:page_categories
+ * http://localhost:5000/api/v1/lineage?nodeId=dataset:file:/usr/local/spark/app/output/result2.parquet
+ **/
+//NOT WORKING AT THE MOMENT.
+app.get("/airflow/tablelineagedataset/:datasetId", function (req, res) {
+  console.log(
+    "-------------NEW QUERY (TABLE LINEAGE VIA DATASETID) -----------------------"
+  );
+  tableLineageCreationDataset(req.params.datasetId);
+  res.send("Called tableLineageCreationDataset");
+});
+
+//sample of 'getLineageGraph' API call (notice the difference in namespaces)
+// http://localhost:5000/api/v1/lineage?nodeId=dataset:postgres://postgres:5432/airflow:page_categories
+// http://localhost:5000/api/v1/lineage?nodeId=dataset:file:/usr/local/spark/app/output/result2.parquet
+// http://localhost:5000/api/v1/lineage?nodeId=job:example:complex_spark_job.execute_insert_into_hadoop_fs_relation_command
 
 app.listen(3001, function () {
   console.log("Server is now running on port 3001");
