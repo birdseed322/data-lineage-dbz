@@ -379,6 +379,7 @@ async function lineageCreationAsyncSpark(
               fetch(marquez_backend + "search?q=" + spark_job_name + ".%").then(
                 (spark_tasks_res) => {
                   spark_tasks_res.json().then((spark_tasks) => {
+                    //Algo does not consider multiple seperate lineage spawned from single spark job!
                     var a_spark_task_nodeId = spark_tasks.results[0].nodeId;
                     spark_tasks.results.forEach(async (spark_task) => {
                       //Create Node for spark_task
@@ -387,46 +388,6 @@ async function lineageCreationAsyncSpark(
                         spark_job_name,
                         spark_task.name
                       );
-                    });
-                    //Depth of lineage graph is defaulted to 20
-                    fetch(
-                      marquez_backend + "lineage?nodeId=" + a_spark_task_nodeId
-                    ).then((lineage_result_res) => {
-                      lineage_result_res.json().then((lineage_result) => {
-                        lineage_result.graph.forEach((lineage_node) => {
-                          if (lineage_node.type == "DATASET") {
-                            lineage_node.inEdges.forEach(async (edge) => {
-                              //Create RS between origin and destination
-                              await createSparkTaskToDatasetRelationship(
-                                extractJobName(edge.origin),
-                                extractJobName(edge.destination)
-                              );
-                            });
-                            lineage_node.outEdges.forEach(async (edge) => {
-                              //Create RS between origin and destination
-                              await createDatasetToSparkTaskRelationship(
-                                extractJobName(edge.origin),
-                                extractJobName(edge.destination)
-                              );
-                            });
-                          } else if (lineage_node.type == "JOB") {
-                            lineage_node.inEdges.forEach(async (edge) => {
-                              //Create RS between origin and destination
-                              await createDatasetToSparkTaskRelationship(
-                                extractJobName(edge.origin),
-                                extractJobName(edge.destination)
-                              );
-                            });
-                            lineage_node.outEdges.forEach(async (edge) => {
-                              //Create RS between origin and destination
-                              await createSparkTaskToDatasetRelationship(
-                                extractJobName(edge.origin),
-                                extractJobName(edge.destination)
-                              );
-                            });
-                          }
-                        });
-                      });
                     });
                   });
                 }
@@ -490,6 +451,7 @@ async function tableLineageCreationTask(taskId) {
     }
   );
 }
+
 async function tableLineageCreationDataset(datasetId) {
   fetch(`${marquez_backend}lineage?nodeId=dataset:${datasetId}`).then(
     (result) => {
@@ -524,6 +486,48 @@ async function tableLineageCreationDataset(datasetId) {
                 extractJobName(edge.destination)
               );
             });
+          }
+        });
+      });
+    }
+  );
+}
+
+async function lineageCreationSparkTables(a_spark_task_nodeId) {
+  fetch(marquez_backend + "lineage?nodeId=" + a_spark_task_nodeId).then(
+    (lineage_result_res) => {
+      lineage_result_res.json().then((lineage_result) => {
+        lineage_result.graph.forEach((lineage_node) => {
+          if (lineage_node.type == "DATASET") {
+            lineage_node.inEdges.forEach(async (edge) => {
+              //Create RS between origin and destination
+              await createSparkTaskToDatasetRelationship(
+                extractJobName(edge.origin),
+                extractJobName(edge.destination)
+              );
+            });
+            // lineage_node.outEdges.forEach(async (edge) => {
+            //   //Create RS between origin and destination
+            //   await createDatasetToSparkTaskRelationship(
+            //     extractJobName(edge.origin),
+            //     extractJobName(edge.destination)
+            //   );
+            // });
+          } else if (lineage_node.type == "JOB") {
+            lineage_node.inEdges.forEach(async (edge) => {
+              //Create RS between origin and destination
+              await createDatasetToSparkTaskRelationship(
+                extractJobName(edge.origin),
+                extractJobName(edge.destination)
+              );
+            });
+            //   lineage_node.outEdges.forEach(async (edge) => {
+            //     //Create RS between origin and destination
+            //     await createSparkTaskToDatasetRelationship(
+            //       extractJobName(edge.origin),
+            //       extractJobName(edge.destination)
+            //     );
+            //   });
           }
         });
       });
@@ -590,6 +594,14 @@ app.get("/airflow/tablelineagedataset/:datasetId", function (req, res) {
 // http://localhost:5000/api/v1/lineage?nodeId=dataset:postgres://postgres:5432/airflow:page_categories
 // http://localhost:5000/api/v1/lineage?nodeId=dataset:file:/usr/local/spark/app/output/result2.parquet
 // http://localhost:5000/api/v1/lineage?nodeId=job:example:complex_spark_job.execute_insert_into_hadoop_fs_relation_command
+
+app.get("/spark/lineagespark/:sparkid", function (req, res) {
+  console.log(
+    "-------------NEW QUERY (SPARK TABLE LINEAGE) -----------------------"
+  );
+  lineageCreationSparkTables(req.params.sparkid);
+  res.send("Called lineageCreationSparkTable");
+});
 
 app.listen(3001, function () {
   console.log("Server is now running on port 3001");
