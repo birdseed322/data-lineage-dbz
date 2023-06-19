@@ -84,7 +84,7 @@ async function createDagNode(dagId) {
 
 /**
  * Function to persist "is_parent_of" relationship between Dag and Task on Neo4j
- * @param {String} dagId - The ID of the parent Dag 
+ * @param {String} dagId - The ID of the parent Dag
  * @param {String} taskId - The ID of the task belonging to the parent Dag
  */
 async function createDagTaskRelationship(dagId, taskId) {
@@ -198,11 +198,13 @@ async function createSparkJobNode(sparkJobId) {
       });
     })
     .catch((err) => {
-      console.log("Error when creating: " + sparkJobId + " Error message: " + err);
+      console.log(
+        "Error when creating: " + sparkJobId + " Error message: " + err
+      );
     });
 }
 
-async function createTaskSparkJobRelationship(taskId, sparkJobId){
+async function createTaskSparkJobRelationship(taskId, sparkJobId) {
   producer
     .connect()
     .then(() => {
@@ -243,7 +245,10 @@ async function createTaskSparkJobRelationship(taskId, sparkJobId){
     });
 }
 
-async function createSparkJobSparkTaskRelationship(parentSparkJobId, sparkTaskId){
+async function createSparkJobSparkTaskRelationship(
+  parentSparkJobId,
+  sparkTaskId
+) {
   producer
     .connect()
     .then(() => {
@@ -366,6 +371,87 @@ async function createSparkTaskToDatasetRelationship(sparkTaskId, datasetId) {
     });
 }
 
+async function createDatasetToTaskRelationship(datasetId, taskId) {
+  producer
+    .connect()
+    .then(() => {
+      console.log("SENDING CREATEDATASETTOTASKRS MESSAGE TO Q");
+      producer.send({
+        topic: "test",
+        messages: [
+          {
+            value: JSON.stringify({
+              op: "merge",
+              properties: {},
+              rel_type: "used_in",
+              from: {
+                ids: { datasetId },
+                labels: ["Dataset"],
+                op: "merge",
+              },
+              to: {
+                ids: { taskId },
+                labels: ["Task"],
+                op: "merge",
+              },
+              type: "relationship",
+            }),
+          },
+        ],
+      });
+    })
+    .catch((err) => {
+      console.log(
+        "Error when creating: " +
+          datasetId +
+          " to " +
+          taskId +
+          " Error message: " +
+          err
+      );
+    });
+}
+
+async function createTaskToDatasetRelationship(taskId, datasetId) {
+  producer
+    .connect()
+    .then(() => {
+      console.log("SENDING CREATETASKDATASETRS MESSAGE TO Q");
+      producer.send({
+        topic: "test",
+        messages: [
+          {
+            value: JSON.stringify({
+              op: "merge",
+              properties: {},
+              rel_type: "outputs_to",
+              from: {
+                ids: { taskId },
+                labels: ["Task"],
+                op: "merge",
+              },
+              to: {
+                ids: { datasetId },
+                labels: ["Dataset"],
+                op: "merge",
+              },
+              type: "relationship",
+            }),
+          },
+        ],
+      });
+    })
+    .catch((err) => {
+      console.log(
+        "Error when creating: " +
+          taskId +
+          " to " +
+          datasetId +
+          " Error message: " +
+          err
+      );
+    });
+}
 
 module.exports = {
   setupKafkaConnect,
@@ -376,5 +462,7 @@ module.exports = {
   createSparkJobSparkTaskRelationship,
   createTaskSparkJobRelationship,
   createDatasetToSparkTaskRelationship,
-  createSparkTaskToDatasetRelationship
+  createSparkTaskToDatasetRelationship,
+  createDatasetToTaskRelationship,
+  createTaskToDatasetRelationship,
 };
