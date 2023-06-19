@@ -4,12 +4,12 @@ from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
 
 default_args = {
-    'owner': 'datascience',
+    'owner': 'dbz',
     'depends_on_past': False,
     'start_date': days_ago(1),
     'email_on_failure': False,
     'email_on_retry': False,
-    'email': ['datascience@example.com']
+    'email': ['dbz@example.com']
 }
 
 dag = DAG(

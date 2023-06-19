@@ -280,6 +280,13 @@ async function lineageCreationCSV(parentDagId, nextParentTaskIds) {
   return rootsArr;
 }
 
+/**
+ * Function that will construct and persist the lineage of a given Dag and its called Spark tasks on Neo4j through a Kafka queue
+ * @param {String} parentDagId - The ID of the parent DAG.
+ * @param {string[]} nextTaskIds - The IDs of the immediate downstream tasks of the TriggerDagOperator task
+ * @param {Boolean} waitForCompletion - Boolean to indicate if the TriggerDagOperator waits for the completion of triggered Dags
+ * @returns {string[]} - Array of Task IDs belonging to the roots of the current Dag
+ */
 async function lineageCreationAsyncSpark(
   parentDagId,
   nextTaskIds,
@@ -392,6 +399,12 @@ async function lineageCreationAsyncSpark(
                   });
                 }
               );
+              task.downstream_task_ids.map(async (downStreamTask) => {
+                await createTaskTaskRelationship(
+                  parentDagId + "." + task.task_id,
+                  downStreamTask
+                );
+              });
             } else {
               task.downstream_task_ids.map(async (downStreamTask) => {
                 await createTaskTaskRelationship(
@@ -409,9 +422,89 @@ async function lineageCreationAsyncSpark(
     .catch((err) => console.log("Airflow API call failed"));
 }
 
-async function tableLineageCreationTask(taskId) {
-  //example namespace to be configured later
-  console.log(`${marquez_backend}lineage?nodeId=job:example:${taskId}`);
+
+
+//Function that makes lineage out of ANY datasets. Need to traverse to check if destination / origin is Spark task or AF task? No real seperation between Dataset, AF and Spark node.
+async function tableLineageCreation(nodeId) {
+  fetch(`${marquez_backend}lineage?nodeId=${nodeId}`).then(
+    async (result) => {
+      result.json().then((json) => {
+        json.graph.forEach(async (node) => {
+          const nodeJobName = node.data.name
+          if (node.type == "DATASET") {
+            node.inEdges.forEach(async (edge) => {
+              const origin = extractJobName(edge.origin)
+              const nodeType = await checkTaskType(origin)
+              if (nodeType == "Spark") {
+                await createSparkTaskToDatasetRelationship(origin, nodeJobName)
+              } else if (nodeType == "Airflow") {
+                await createTaskToDatasetRelationship(origin, nodeJobName)
+              } else {
+                console.log("Buggin")
+              }
+            });
+          } else if (node.type == "JOB") {
+            const destination = extractJobName(nodeJobName)
+            const nodeType = await checkTaskType(destination)
+            node. inEdges.forEach(async (edge) => {
+              const origin = extractJobName(edge.origin)
+              if (nodeType == "Spark") {
+                await createDatasetToSparkTaskRelationship(origin, destination)
+              } else if (nodeType == "Airflow") {
+                await createDatasetToTaskRelationship(origin, destination)
+              } else {
+                console.log("Buggin")
+              }
+            });
+          }
+        });
+      });
+    }
+  );
+}
+
+//Function SPECIFIC to making lineage of spark tasks within Spark jobs. Consider if datasource shared between AF and Spark. Use tableLineageCreation[DEPRECATED]
+// async function lineageCreationSparkTables(taskId) {
+//   fetch(`${marquez_backend}lineage?nodeId=job:example:${taskId}`).then(
+//     (lineage_result_res) => {
+//       lineage_result_res.json().then((lineage_result) => {
+//         lineage_result.graph.forEach((lineage_node) => {
+//           if (lineage_node.type == "DATASET") {
+//             lineage_node.inEdges.forEach(async (edge) => {
+//               //Create RS between origin and destination
+//               await createSparkTaskToDatasetRelationship(
+//                 extractJobName(edge.origin),
+//                 extractJobName(edge.destination)
+//               );
+//             });
+//           } else if (lineage_node.type == "JOB") {
+//             lineage_node.inEdges.forEach(async (edge) => {
+//               //Create RS between origin and destination
+//               await createDatasetToSparkTaskRelationship(
+//                 extractJobName(edge.origin),
+//                 extractJobName(edge.destination)
+//               );
+//             });
+//           }
+//         });
+//       });
+//     }
+//   );
+// }
+
+//Function that in GENERAL makes lineage out of ANY task within both Spark jobs and Airflow Dags.  Consider if datasource shared between AF and Spark. Use tableLineageCreation[DEPRECATED] 
+// async function tableLineageCreationTask(taskId) {
+//   console.log(`${marquez_backend}lineage?nodeId=job:example:${taskId}`);
+//   const taskType = await checkTaskType(taskId)
+//   //example namespace to be configured later
+//   if (taskType == "Airflow") {
+//     lineageCreationAirflowTables(taskId)
+//   } else if (taskType == "Spark") {
+//     lineageCreationSparkTables(taskId)
+//   }
+// }
+
+async function lineageCreationAirflowTables(taskId) {
   fetch(`${marquez_backend}lineage?nodeId=job:example:${taskId}`).then(
     (result) => {
       result.json().then((json) => {
@@ -423,28 +516,14 @@ async function tableLineageCreationTask(taskId) {
                 extractJobName(edge.destination)
               );
             });
-            node.outEdges.forEach(async (edge) => {
+          } else if (node.type == "JOB") {
+            node.inEdges.forEach(async (edge) => {
               //Create RS between origin and destination
               await createDatasetToTaskRelationship(
                 extractJobName(edge.origin),
                 extractJobName(edge.destination)
               );
             });
-          } else if (node.type == "JOB") {
-            node.inEdges.forEach(async (edge) => {
-              //Create RS between origin and destination
-              await createDatasetToSparkTaskRelationship(
-                extractJobName(edge.origin),
-                extractJobName(edge.destination)
-              );
-            });
-            node.outEdges.forEach(async (edge) => {
-              //Create RS between origin and destination
-              await createSparkTaskToDatasetRelationship(
-                extractJobName(edge.origin),
-                extractJobName(edge.destination)
-              );
-            });
           }
         });
       });
@@ -452,89 +531,25 @@ async function tableLineageCreationTask(taskId) {
   );
 }
 
-async function tableLineageCreationDataset(datasetId) {
-  fetch(`${marquez_backend}lineage?nodeId=dataset:${datasetId}`).then(
-    (result) => {
-      result.json().then((json) => {
-        json.graph.forEach((node) => {
-          if (node.type == "DATASET") {
-            node.inEdges.forEach(async (edge) => {
-              await createTaskToDatasetRelationship(
-                extractJobName(edge.origin),
-                extractJobName(edge.destination)
-              );
-            });
-            node.outEdges.forEach(async (edge) => {
-              //Create RS between origin and destination
-              await createDatasetToTaskRelationship(
-                extractJobName(edge.origin),
-                extractJobName(edge.destination)
-              );
-            });
-          } else if (node.type == "JOB") {
-            node.inEdges.forEach(async (edge) => {
-              //Create RS between origin and destination
-              await createDatasetToSparkTaskRelationship(
-                extractJobName(edge.origin),
-                extractJobName(edge.destination)
-              );
-            });
-            node.outEdges.forEach(async (edge) => {
-              //Create RS between origin and destination
-              await createSparkTaskToDatasetRelationship(
-                extractJobName(edge.origin),
-                extractJobName(edge.destination)
-              );
-            });
-          }
-        });
-      });
-    }
-  );
+async function checkTaskType(taskId) {
+  return await fetch(`${marquez_backend}namespaces/example/jobs/${taskId}`).then((response) => {
+    return response.json().then((task) => {
+      if (task.latestRun.facets.spark_version) {
+        return "Spark"
+      } else if (task.latestRun.facets.airflow_version) {
+        return "Airflow"
+      } else {
+        return "Unresolved"
+      }
+    })
+  })
+
 }
 
-async function lineageCreationSparkTables(a_spark_task_nodeId) {
-  fetch(marquez_backend + "lineage?nodeId=" + a_spark_task_nodeId).then(
-    (lineage_result_res) => {
-      lineage_result_res.json().then((lineage_result) => {
-        lineage_result.graph.forEach((lineage_node) => {
-          if (lineage_node.type == "DATASET") {
-            lineage_node.inEdges.forEach(async (edge) => {
-              //Create RS between origin and destination
-              await createSparkTaskToDatasetRelationship(
-                extractJobName(edge.origin),
-                extractJobName(edge.destination)
-              );
-            });
-            // lineage_node.outEdges.forEach(async (edge) => {
-            //   //Create RS between origin and destination
-            //   await createDatasetToSparkTaskRelationship(
-            //     extractJobName(edge.origin),
-            //     extractJobName(edge.destination)
-            //   );
-            // });
-          } else if (lineage_node.type == "JOB") {
-            lineage_node.inEdges.forEach(async (edge) => {
-              //Create RS between origin and destination
-              await createDatasetToSparkTaskRelationship(
-                extractJobName(edge.origin),
-                extractJobName(edge.destination)
-              );
-            });
-            //   lineage_node.outEdges.forEach(async (edge) => {
-            //     //Create RS between origin and destination
-            //     await createSparkTaskToDatasetRelationship(
-            //       extractJobName(edge.origin),
-            //       extractJobName(edge.destination)
-            //     );
-            //   });
-          }
-        });
-      });
-    }
-  );
-}
 
+
+
+//END POINTS
 app.get("/", function (req, res) {
   res.send("Landing Page");
 });
@@ -561,14 +576,14 @@ app.get("/airflow/lineageasyncspark/:dagId", function (req, res) {
   res.send("Called lineageCreationAsyncSpark");
 });
 
-//param in this function must be in the format {dagName}.{dagTaskName} (assume namespace is 'example')
-app.get("/airflow/tablelineagetask/:taskId", function (req, res) {
-  console.log(
-    "-------------NEW QUERY (TABLE LINEAGE VIA TASKID) -----------------------"
-  );
-  tableLineageCreationTask(req.params.taskId);
-  res.send("Called tableLineageCreationTask");
-});
+//param in this function must be in the format {dagName}.{dagTaskName} (assume namespace is 'example'). Use tableLineageCreation.
+// app.get("/airflow/tablelineagetask/:taskId", function (req, res) {
+//   console.log(
+//     "-------------NEW QUERY (TABLE LINEAGE VIA TASKID) -----------------------"
+//   );
+//   tableLineageCreationTask(req.params.taskId);
+//   res.send("Called tableLineageCreationTask");
+// });
 
 /**
  * Dataset has to be in the form of {namespace}:{table name} (if taken from db) / {path to file} (if local file)
@@ -584,13 +599,12 @@ app.get("/airflow/tablelineagetask/:taskId", function (req, res) {
  * But query does not process when the following endpoint is called
  * http://localhost:3001/airflow/tablelineagedataset/file:/usr/local/spark/app/output/result2.parquet
  **/
-//NOT WORKING AT THE MOMENT.
-app.get("/airflow/tablelineagedataset/:datasetId", function (req, res) {
+app.get("/airflow/tablelineage", function (req, res) {
   console.log(
-    "-------------NEW QUERY (TABLE LINEAGE VIA DATASETID) -----------------------"
+    "-------------NEW QUERY (TABLE LINEAGE VIA NODEID) -----------------------"
   );
-  tableLineageCreationDataset(req.params.datasetId);
-  res.send("Called tableLineageCreationDataset");
+  tableLineageCreation(req.query.nodeId);
+  res.send("Called tableLineageCreation");
 });
 
 //sample of 'getLineageGraph' API call (notice the difference in namespaces)
@@ -598,13 +612,14 @@ app.get("/airflow/tablelineagedataset/:datasetId", function (req, res) {
 // http://localhost:5000/api/v1/lineage?nodeId=dataset:file:/usr/local/spark/app/output/result2.parquet
 // http://localhost:5000/api/v1/lineage?nodeId=job:example:complex_spark_job.execute_insert_into_hadoop_fs_relation_command
 
-app.get("/spark/lineagespark/:sparkid", function (req, res) {
-  console.log(
-    "-------------NEW QUERY (SPARK TABLE LINEAGE) -----------------------"
-  );
-  lineageCreationSparkTables(req.params.sparkid);
-  res.send("Called lineageCreationSparkTable");
-});
+// Use tableLineageCreation
+// app.get("/spark/lineagespark/:sparkid", function (req, res) {
+//   console.log(
+//     "-------------NEW QUERY (SPARK TABLE LINEAGE) -----------------------"
+//   );
+//   lineageCreationSparkTables(req.params.sparkid);
+//   res.send("Called lineageCreationSparkTable");
+// });
 
 app.listen(3001, function () {
   console.log("Server is now running on port 3001");

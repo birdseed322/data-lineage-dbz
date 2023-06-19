@@ -107,7 +107,7 @@ async function createDagTaskRelationship(dagId, taskId) {
               },
               to: {
                 ids: { taskId: dagId + "." + taskId },
-                labels: ["Job"],
+                labels: ["Airflow Task"],
                 op: "merge",
               },
               type: "relationship",
@@ -148,12 +148,12 @@ async function createTaskTaskRelationship(taskId1, taskId2) {
               rel_type: "activates",
               from: {
                 ids: { taskId: taskId1 },
-                labels: ["Job"],
+                labels: ["Airflow Task"],
                 op: "merge",
               },
               to: {
                 ids: { taskId: taskId2 },
-                labels: ["Job"],
+                labels: ["Airflow Task"],
                 op: "merge",
               },
               type: "relationship",
@@ -219,7 +219,7 @@ async function createTaskSparkJobRelationship(taskId, sparkJobId) {
               rel_type: "activates",
               from: {
                 ids: { taskId },
-                labels: ["Job"],
+                labels: ["Airflow Task"],
                 op: "merge",
               },
               to: {
@@ -391,7 +391,7 @@ async function createDatasetToTaskRelationship(datasetId, taskId) {
               },
               to: {
                 ids: { taskId },
-                labels: ["Task"],
+                labels: ["Airflow Task"],
                 op: "merge",
               },
               type: "relationship",
@@ -427,7 +427,7 @@ async function createTaskToDatasetRelationship(taskId, datasetId) {
               rel_type: "outputs_to",
               from: {
                 ids: { taskId },
-                labels: ["Task"],
+                labels: ["Airflow Task"],
                 op: "merge",
               },
               to: {
