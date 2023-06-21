@@ -1,0 +1,88 @@
+openapi: 3.0.0
+info:
+  title: data-lineage-dbz REST API
+  version: 1.0.0
+  description: data-lineage-dbz is an opensource tool that enables users to visualize the lineages between jobs and datasets within a data ecosystem.
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:3001
+    description: Local data-lineage-dbz backend REST server
+paths:
+  /airflow/lineagecsv/{dagId}:
+    parameters:
+      - $ref: '#/components/parameters/dagId'
+    get:
+      summary: Exports CSV of downstream task level dependency
+      description: Endpoint to export local copy of downstream task level dependency of an Airflow DAG (Does not support Spark jobs and tasks)
+      responses:
+        '200':
+          description: Successful response
+          content:
+            text/plain:
+              type: String
+      tags: 
+        - Task Level
+  /airflow/lineageasync/{dagId}:
+    parameters:
+      - $ref: '#/components/parameters/dagId'
+    get:
+      summary: Persists downstream task level dependency (Does not support Spark jobs and tasks)
+      description: Endpoint to create and persist the downstream task dependency of an Airflow DAG on Neo4j server 
+      responses:
+        '200':
+          description: Successful response
+          content:
+            text/plain:
+              type: String
+      tags: 
+        - Task Level
+  /airflow/lineageasyncspark/{dagId}:
+    parameters:
+      - $ref: '#/components/parameters/dagId'
+    get:
+      summary: Persists downstream task level dependency (Spark jobs and tasks support)
+      description: Endpoint to create and persist the downstream task dependency of an Airflow DAG and its triggered Spark jobs on Neo4j
+      responses:
+        '200':
+          description: Successful response
+          content:
+            text/plain:
+              type: String
+      tags: 
+        - Task Level
+  /tablelineage:
+    parameters:
+      - $ref: '#/components/parameters/nodeId'
+    get:
+      summary: Persists data lineage of a task or datasource
+      description: Endpoint to create and persist the data lineage of an Airflow task, Spark task or datasource on Neo4j
+      responses:
+        '200':
+          description: Successful response
+          content:
+            text/plain:
+              type: String
+      tags: 
+        - Table Level
+components:
+  schemas:
+  parameters:
+    dagId:
+      name: dagId
+      in: path
+      description: The id of an Airflow DAG.
+      required: true
+      schema:
+        type: string
+        example: my_dag
+    nodeId:
+      name: nodeId
+      in: query
+      description: The id of a node on Marquez
+      required: true
+      schema:
+        type: string
+        example: my_dag.task1
+    

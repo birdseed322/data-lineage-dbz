@@ -463,47 +463,6 @@ async function tableLineageCreation(nodeId) {
   );
 }
 
-//Function SPECIFIC to making lineage of spark tasks within Spark jobs. Consider if datasource shared between AF and Spark. Use tableLineageCreation[DEPRECATED]
-// async function lineageCreationSparkTables(taskId) {
-//   fetch(`${marquez_backend}lineage?nodeId=job:example:${taskId}`).then(
-//     (lineage_result_res) => {
-//       lineage_result_res.json().then((lineage_result) => {
-//         lineage_result.graph.forEach((lineage_node) => {
-//           if (lineage_node.type == "DATASET") {
-//             lineage_node.inEdges.forEach(async (edge) => {
-//               //Create RS between origin and destination
-//               await createSparkTaskToDatasetRelationship(
-//                 extractJobName(edge.origin),
-//                 extractJobName(edge.destination)
-//               );
-//             });
-//           } else if (lineage_node.type == "JOB") {
-//             lineage_node.inEdges.forEach(async (edge) => {
-//               //Create RS between origin and destination
-//               await createDatasetToSparkTaskRelationship(
-//                 extractJobName(edge.origin),
-//                 extractJobName(edge.destination)
-//               );
-//             });
-//           }
-//         });
-//       });
-//     }
-//   );
-// }
-
-//Function that in GENERAL makes lineage out of ANY task within both Spark jobs and Airflow Dags.  Consider if datasource shared between AF and Spark. Use tableLineageCreation[DEPRECATED] 
-// async function tableLineageCreationTask(taskId) {
-//   console.log(`${marquez_backend}lineage?nodeId=job:example:${taskId}`);
-//   const taskType = await checkTaskType(taskId)
-//   //example namespace to be configured later
-//   if (taskType == "Airflow") {
-//     lineageCreationAirflowTables(taskId)
-//   } else if (taskType == "Spark") {
-//     lineageCreationSparkTables(taskId)
-//   }
-// }
-
 async function lineageCreationAirflowTables(taskId) {
   fetch(`${marquez_backend}lineage?nodeId=job:example:${taskId}`).then(
     (result) => {
@@ -546,9 +505,6 @@ async function checkTaskType(taskId) {
 
 }
 
-
-
-
 //END POINTS
 app.get("/", function (req, res) {
   res.send("Landing Page");
@@ -576,50 +532,13 @@ app.get("/airflow/lineageasyncspark/:dagId", function (req, res) {
   res.send("Called lineageCreationAsyncSpark");
 });
 
-//param in this function must be in the format {dagName}.{dagTaskName} (assume namespace is 'example'). Use tableLineageCreation.
-// app.get("/airflow/tablelineagetask/:taskId", function (req, res) {
-//   console.log(
-//     "-------------NEW QUERY (TABLE LINEAGE VIA TASKID) -----------------------"
-//   );
-//   tableLineageCreationTask(req.params.taskId);
-//   res.send("Called tableLineageCreationTask");
-// });
-
-/**
- * Dataset has to be in the form of {namespace}:{table name} (if taken from db) / {path to file} (if local file)
- * The 2 kinds of datasets will have 2 different namespaces (e.g 'file' / 'postgres://postgres:5432/airflow')
- * The issue is
- * 1) Querying what namespace a dataset belongs to
- * 2) Putting the parameters within the endpoint (I suspect the '/' slashes messes up the endpoint)
- * May have to implement as an input parameter
- * Sample of dataset queries:
- * http://localhost:5000/api/v1/lineage?nodeId=dataset:postgres://postgres:5432/airflow:page_categories
- * http://localhost:5000/api/v1/lineage?nodeId=dataset:file:/usr/local/spark/app/output/result2.parquet
- *
- * But query does not process when the following endpoint is called
- * http://localhost:3001/airflow/tablelineagedataset/file:/usr/local/spark/app/output/result2.parquet
- **/
-app.get("/airflow/tablelineage", function (req, res) {
+app.get("/tablelineage", function (req, res) {
   console.log(
     "-------------NEW QUERY (TABLE LINEAGE VIA NODEID) -----------------------"
   );
   tableLineageCreation(req.query.nodeId);
   res.send("Called tableLineageCreation");
 });
-
-//sample of 'getLineageGraph' API call (notice the difference in namespaces)
-// http://localhost:5000/api/v1/lineage?nodeId=dataset:postgres://postgres:5432/airflow:page_categories
-// http://localhost:5000/api/v1/lineage?nodeId=dataset:file:/usr/local/spark/app/output/result2.parquet
-// http://localhost:5000/api/v1/lineage?nodeId=job:example:complex_spark_job.execute_insert_into_hadoop_fs_relation_command
-
-// Use tableLineageCreation
-// app.get("/spark/lineagespark/:sparkid", function (req, res) {
-//   console.log(
-//     "-------------NEW QUERY (SPARK TABLE LINEAGE) -----------------------"
-//   );
-//   lineageCreationSparkTables(req.params.sparkid);
-//   res.send("Called lineageCreationSparkTable");
-// });
 
 app.listen(3001, function () {
   console.log("Server is now running on port 3001");
