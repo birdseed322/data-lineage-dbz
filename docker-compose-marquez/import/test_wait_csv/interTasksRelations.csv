@@ -1,2 +1,0 @@
-SOURCE_ID,DEST_ID
-test_wait.start,test_wait.trigger_test_wait_target1_dag
