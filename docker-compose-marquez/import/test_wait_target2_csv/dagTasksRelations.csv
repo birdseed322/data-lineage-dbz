@@ -1,0 +1,3 @@
+DAG_ID,TASK_ID
+test_wait_target2,test_wait_target2.done
+test_wait_target2,test_wait_target2.start

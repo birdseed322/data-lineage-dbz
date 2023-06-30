@@ -1,6 +1,7 @@
 {
   "name": "Neo4jSinkConnectorJSONString",
   "config": {
+    "neo4j.database": "neo4j",
     "topics": "test",
     "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
     "key.converter": "org.apache.kafka.connect.json.JsonConverter",

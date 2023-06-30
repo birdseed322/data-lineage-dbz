@@ -1,0 +1,4 @@
+DAG_ID,TASK_ID
+test_wait,test_wait.done
+test_wait,test_wait.start
+test_wait,test_wait.trigger_test_wait_target1_dag

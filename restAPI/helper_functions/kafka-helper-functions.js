@@ -129,6 +129,52 @@ async function createDagTaskRelationship(dagId, taskId) {
 }
 
 /**
+ * Function to persist "triggers" relationship between Dag and Dag on Neo4j
+ * @param {String} dagId1 - The ID of the parent Dag
+ * @param {String} dagId2 - The ID of the child Dag
+ */
+async function createDagDagRelationship(dagId1, dagId2) {
+  producer
+    .connect()
+    .then(() => {
+      console.log("SENDING CREATEDAGDAG MESSAGE TO Q");
+      console.log(dagId1 + " to " + dagId2)
+      producer.send({
+        topic: "test",
+        messages: [
+          {
+            value: JSON.stringify({
+              op: "merge",
+              properties: {},
+              rel_type: "triggers",
+              from: {
+                ids: { dagId: dagId1 },
+                labels: ["Dag"],
+                op: "merge",
+              },
+              to: {
+                ids: { dagId: dagId2 },
+                labels: ["Dag"],
+                op: "merge",
+              },
+              type: "relationship",
+            }),
+          },
+        ],
+      });
+    })
+    .catch((err) => {
+      console.log(
+        "Error when creating: " +
+          dagId1 +
+          " to " +
+          dagId2 +
+          " Error message: " +
+          err
+      );
+    });
+}
+/**
  * Function to persist "activates" relationship between 2 Tasks on Neo4j to illustrate dependency
  * @param {String} taskId1 - The ID of the upstream Task
  * @param {String} taskId2 - The ID of the downstream Task
@@ -457,6 +503,7 @@ module.exports = {
   setupKafkaConnect,
   createDagNode,
   createDagTaskRelationship,
+  createDagDagRelationship,
   createTaskTaskRelationship,
   createSparkJobNode,
   createSparkJobSparkTaskRelationship,

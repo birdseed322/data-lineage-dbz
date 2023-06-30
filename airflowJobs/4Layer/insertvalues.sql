@@ -1,0 +1,42 @@
+INSERT INTO L0_t1 (c1, c2, c3)
+VALUES (1, 1, 1);
+INSERT INTO L0_t2 (c1, c2, c3)
+VALUES (1, 1, 1);
+INSERT INTO L0_t3 (c1, c2, c3)
+VALUES (1, 1, 1);
+INSERT INTO L0_t4 (c1, c2, c3)
+VALUES (1, 1, 1);
+INSERT INTO L0_t5 (c1, c2, c3)
+VALUES (1, 1, 1);
+INSERT INTO L0_t6 (c1, c2, c3, c4)
+VALUES (1, 1, 1, 1);
+INSERT INTO L0_t7 (c1, c2, c3, c4, c5)
+VALUES (1, 1, 1, 1, 1);
+INSERT INTO L0_t8 (c1, c2, c3)
+VALUES (1, 1, 1);
+INSERT INTO L0_t9 (c1, c2, c3)
+VALUES (1, 1, 1);
+INSERT INTO L0_t10 (c1, c2, c3, c4)
+VALUES (1, 1, 1, 1);
+INSERT INTO L1_t1 (c1, c2, c3)
+VALUES (1, 1, 1);
+INSERT INTO L1_t2 (c1, c2, c3)
+VALUES (1, 1, 1);
+INSERT INTO L1_t3 (c1, c2, c3)
+VALUES (1, 1, 1);
+INSERT INTO L2_t1 (c1, c2, c3)
+VALUES (1, 1, 1);
+INSERT INTO L2_t2 (c1, c2, c3)
+VALUES (1, 1, 1);
+INSERT INTO L2_t3 (c1, c2, c3)
+VALUES (1, 1, 1);
+INSERT INTO L3_t1 (c1, c2, c3)
+VALUES (1, 1, 1);
+INSERT INTO L3_t2 (c1, c2, c3)
+VALUES (1, 1, 1);
+INSERT INTO L3_t3 (c1, c2, c3)
+VALUES (1, 1, 1);
+INSERT INTO L3_t4 (c1, c2, c3)
+VALUES (1, 1, 1);
+INSERT INTO L3_t5 (c1, c2, c3)
+VALUES (1, 1, 1);

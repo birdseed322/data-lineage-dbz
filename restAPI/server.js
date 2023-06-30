@@ -11,6 +11,7 @@ const {
   setupKafkaConnect,
   createDagNode,
   createDagTaskRelationship,
+  createDagDagRelationship,
   createTaskTaskRelationship,
   createSparkJobNode,
   createTaskSparkJobRelationship,
@@ -293,6 +294,7 @@ async function lineageCreationAsyncSpark(
   waitForCompletion
 ) {
   var roots = [];
+  console.log("Now in " + parentDagId);
   await createDagNode(parentDagId);
   return fetch(airflow_backend + "dags/" + parentDagId + "/tasks", {
     headers: {
@@ -349,6 +351,11 @@ async function lineageCreationAsyncSpark(
                 .wait_for_completion;
 
             if (task.operator_name == "TriggerDagRunOperator") {
+              const target_dag_id =
+              marquez_task.latestRun.facets.airflow.task.args.trigger_dag_id;
+              //Creates "trigger" relationship with downstream dag. Job level dependency
+              await createDagDagRelationship(parentDagId, target_dag_id);
+              console.log("Parent = " + parentDagId + " Child = " + target_dag_id)
               if (!wait_for_completion) {
                 task.downstream_task_ids.map(async (downStreamTask) => {
                   await createTaskTaskRelationship(
@@ -357,8 +364,6 @@ async function lineageCreationAsyncSpark(
                   );
                 });
               }
-              const target_dag_id =
-                marquez_task.latestRun.facets.airflow.task.args.trigger_dag_id;
               fetchPromises.push(
                 await lineageCreationAsync(
                   target_dag_id,

@@ -143,6 +143,7 @@ services:
       - NEO4J_dbms_memory_pagecache_size=1G
       - NEO4J_dbms.memory.heap.initial_size=1G
       - NEO4J_dbms_memory_heap_max__size=1G
+      - NEO4J_AUTH=neo4j/password
   kafka:
     image: "bitnami/kafka:latest"
     restart: unless-stopped
@@ -150,8 +151,6 @@ services:
     ports:
       - 9092:9092
       - 9094:9094
-    volumes:
-      - ./kafka:/bitnami
     environment:
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_BROKER_ID=1
