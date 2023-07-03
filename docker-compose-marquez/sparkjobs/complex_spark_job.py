@@ -44,3 +44,13 @@ result2.write.mode("overwrite").parquet("file:///usr/local/spark/app/output/resu
 
 # Stop the SparkSession
 spark.stop()
+
+# To run this spark job manually, copy the following command into the Spark container's terminal
+
+'''
+spark-submit --conf "spark.extraListeners=io.openlineage.spark.agent.OpenLineageSparkListener" \
+    --packages "io.openlineage:openlineage-spark:0.27.2" \
+    --conf "spark.openlineage.transport.url=http://marquez:5000/api/v1/namespaces/example/" \
+    --conf "spark.openlineage.transport.type=http" \
+    --jars /usr/local/spark/app/postgresql-42.6.0.jar complex_spark_job.py
+'''

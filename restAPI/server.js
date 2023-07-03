@@ -352,10 +352,12 @@ async function lineageCreationAsyncSpark(
 
             if (task.operator_name == "TriggerDagRunOperator") {
               const target_dag_id =
-              marquez_task.latestRun.facets.airflow.task.args.trigger_dag_id;
+                marquez_task.latestRun.facets.airflow.task.args.trigger_dag_id;
               //Creates "trigger" relationship with downstream dag. Job level dependency
               await createDagDagRelationship(parentDagId, target_dag_id);
-              console.log("Parent = " + parentDagId + " Child = " + target_dag_id)
+              console.log(
+                "Parent = " + parentDagId + " Child = " + target_dag_id
+              );
               if (!wait_for_completion) {
                 task.downstream_task_ids.map(async (downStreamTask) => {
                   await createTaskTaskRelationship(
@@ -427,45 +429,41 @@ async function lineageCreationAsyncSpark(
     .catch((err) => console.log("Airflow API call failed"));
 }
 
-
-
 //Function that makes lineage out of ANY datasets. Need to traverse to check if destination / origin is Spark task or AF task? No real seperation between Dataset, AF and Spark node.
 async function tableLineageCreation(nodeId) {
-  fetch(`${marquez_backend}lineage?nodeId=${nodeId}`).then(
-    async (result) => {
-      result.json().then((json) => {
-        json.graph.forEach(async (node) => {
-          const nodeJobName = node.data.name
-          if (node.type == "DATASET") {
-            node.inEdges.forEach(async (edge) => {
-              const origin = extractJobName(edge.origin)
-              const nodeType = await checkTaskType(origin)
-              if (nodeType == "Spark") {
-                await createSparkTaskToDatasetRelationship(origin, nodeJobName)
-              } else if (nodeType == "Airflow") {
-                await createTaskToDatasetRelationship(origin, nodeJobName)
-              } else {
-                console.log("Buggin")
-              }
-            });
-          } else if (node.type == "JOB") {
-            const destination = extractJobName(nodeJobName)
-            const nodeType = await checkTaskType(destination)
-            node. inEdges.forEach(async (edge) => {
-              const origin = extractJobName(edge.origin)
-              if (nodeType == "Spark") {
-                await createDatasetToSparkTaskRelationship(origin, destination)
-              } else if (nodeType == "Airflow") {
-                await createDatasetToTaskRelationship(origin, destination)
-              } else {
-                console.log("Buggin")
-              }
-            });
-          }
-        });
+  fetch(`${marquez_backend}lineage?nodeId=${nodeId}`).then(async (result) => {
+    result.json().then((json) => {
+      json.graph.forEach(async (node) => {
+        const nodeJobName = node.data.name;
+        if (node.type == "DATASET") {
+          node.inEdges.forEach(async (edge) => {
+            const origin = extractJobName(edge.origin);
+            const nodeType = await checkTaskType(origin);
+            if (nodeType == "Spark") {
+              await createSparkTaskToDatasetRelationship(origin, nodeJobName);
+            } else if (nodeType == "Airflow") {
+              await createTaskToDatasetRelationship(origin, nodeJobName);
+            } else {
+              console.log("Buggin");
+            }
+          });
+        } else if (node.type == "JOB") {
+          const destination = extractJobName(nodeJobName);
+          const nodeType = await checkTaskType(destination);
+          node.inEdges.forEach(async (edge) => {
+            const origin = extractJobName(edge.origin);
+            if (nodeType == "Spark") {
+              await createDatasetToSparkTaskRelationship(origin, destination);
+            } else if (nodeType == "Airflow") {
+              await createDatasetToTaskRelationship(origin, destination);
+            } else {
+              console.log("Buggin");
+            }
+          });
+        }
       });
-    }
-  );
+    });
+  });
 }
 
 async function lineageCreationAirflowTables(taskId) {
@@ -496,18 +494,19 @@ async function lineageCreationAirflowTables(taskId) {
 }
 
 async function checkTaskType(taskId) {
-  return await fetch(`${marquez_backend}namespaces/example/jobs/${taskId}`).then((response) => {
+  return await fetch(
+    `${marquez_backend}namespaces/example/jobs/${taskId}`
+  ).then((response) => {
     return response.json().then((task) => {
       if (task.latestRun.facets.spark_version) {
-        return "Spark"
+        return "Spark";
       } else if (task.latestRun.facets.airflow_version) {
-        return "Airflow"
+        return "Airflow";
       } else {
-        return "Unresolved"
+        return "Unresolved";
       }
-    })
-  })
-
+    });
+  });
 }
 
 //END POINTS
