@@ -394,7 +394,6 @@ async function lineageCreationAsyncSpark(
                 (spark_tasks_res) => {
                   spark_tasks_res.json().then((spark_tasks) => {
                     //Algo does not consider multiple seperate lineage spawned from single spark job!
-                    var a_spark_task_nodeId = spark_tasks.results[0].nodeId;
                     spark_tasks.results.forEach(async (spark_task) => {
                       //Create Node for spark_task
                       //Create association with spark_job_name node (parent)

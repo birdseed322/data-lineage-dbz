@@ -334,13 +334,3 @@ async def create_task_dataset_relationship(task_id, dataset_id):
           dataset_id + 
           " Error message: " +
           err)
-
-
-async def main():
-    dag = "test"  # Replace with the desired dagId
-    await create_dag_node(dag)
-# Run the main function within an event loop
-loop = asyncio.get_event_loop()
-loop.run_until_complete(main())
-
-producer.close()
