@@ -8,6 +8,11 @@ marquez_backend = "http://localhost:5000/api/v1/"
 airflow_backend = "http://localhost:8080/api/v1/"
 airflow_user = "airflow"
 airflow_password = "airflow"
+dictionary = {}
+headers =  {
+  "Authorization": "Basic " + base64.b64encode(str.encode(f'{airflow_user}:{airflow_password}')).decode('utf-8'),
+  "Content-type": "application/json"
+}
 
 kafka_helper.setup_kafka_connect()
 
@@ -55,4 +60,4 @@ async def lineage_creation_async_spark(parent_dag_id, next_task_ids, wait_for_co
     return roots
 # Usage
 loop = asyncio.get_event_loop()
-roots = loop.run_until_complete(lineage_creation_async_spark("test_four_layer", None, None))
+loop.run_until_complete(lineage_creation_async_spark("test_four_layer", None, None))
