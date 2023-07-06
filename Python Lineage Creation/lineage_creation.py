@@ -11,6 +11,21 @@ airflow_password = "airflow"
 
 kafka_helper.setup_kafka_connect()
 
+def extract_job_name(input_string):
+    parts = input_string.split(":")
+    job_name = parts[-1]
+    return job_name
+
+def check_task_type(task_id):
+    task = requests.get(marquez_backend + "namespaces/example/jobs/" + task_id).json()
+    facets = task["latestRun"]["facets"]
+    if "spark_version" in facets:
+        return "Spark"
+    elif "airflow_version" in facets:
+        return "Airflow"
+    else:
+        return "Unresolved"
+    
 async def lineage_creation_async_spark(parent_dag_id, next_task_ids, wait_for_completion):
     roots = []
     await kafka_helper.create_dag_node(parent_dag_id)
@@ -53,6 +68,18 @@ async def lineage_creation_async_spark(parent_dag_id, next_task_ids, wait_for_co
                 await kafka_helper.create_task_task_relationship(parent_dag_id + "." + task["task_id"], downstream_task)
 
     return roots
+
+def table_lineage_creation(node_id):
+    graph = requests.get(marquez_backend + "lineage?nodeId=" + node_id).json()["graph"]
+    for node in graph:
+        node_job_name = node["data"]["name"]
+        if node["type"] == "DATASET":
+            for edge in node["inEdges"]:
+                origin = extract_job_name(edge["origin"])
+                node_type = check_task_type(origin)
+                if node_type == "Spark":
+                    print("Create spark task to dataset rs ")
 # Usage
-loop = asyncio.get_event_loop()
-roots = loop.run_until_complete(lineage_creation_async_spark("test_four_layer", None, None))
+table_lineage_creation("job:example:test_four_layer.l2_task_2")
+# loop = asyncio.get_event_loop()
+# roots = loop.run_until_complete(lineage_creation_async_spark("test_four_layer", None, None))
