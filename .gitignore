@@ -10,3 +10,4 @@ docker-compose-marquez/sparkjobs/output/
 docker-compose-marquez/sparkjobs/metastore_db/
 docker-compose-marquez/dags/__pycache__
 docker-compose-marquez/import/
+python-lineage-creation/helper_functions/__pycache__

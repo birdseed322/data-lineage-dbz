@@ -8,6 +8,11 @@ marquez_backend = "http://localhost:5000/api/v1/"
 airflow_backend = "http://localhost:8080/api/v1/"
 airflow_user = "airflow"
 airflow_password = "airflow"
+dictionary = {}
+headers =  {
+  "Authorization": "Basic " + base64.b64encode(str.encode(f'{airflow_user}:{airflow_password}')).decode('utf-8'),
+  "Content-type": "application/json"
+}
 
 kafka_helper.setup_kafka_connect()
 
