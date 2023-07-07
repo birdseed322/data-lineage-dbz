@@ -74,7 +74,7 @@ async def lineage_creation_async_spark(parent_dag_id, next_task_ids, wait_for_co
 
     return roots
 
-def table_lineage_creation(node_id):
+async def table_lineage_creation(node_id):
     graph = requests.get(marquez_backend + "lineage?nodeId=" + node_id).json()["graph"]
     for node in graph:
         node_job_name = node["data"]["name"]
@@ -83,8 +83,24 @@ def table_lineage_creation(node_id):
                 origin = extract_job_name(edge["origin"])
                 node_type = check_task_type(origin)
                 if node_type == "Spark":
-                    print("Create spark task to dataset rs ")
+                    await kafka_helper.create_spark_task_dataset_relationship(origin, node_job_name)
+                if node_type == "Airflow":
+                    await kafka_helper.create_task_dataset_relationship(origin, node_job_name)
+                else:
+                    print("Unresolved")
+        elif node["type"] == "JOB":
+            destination = extract_job_name(node_job_name)
+            node_type = check_task_type(destination)
+            for edge in node["inEdges"]:
+                origin = extract_job_name(edge["origin"])
+                if node_type == "Spark":
+                    await kafka_helper.create_dataset_spark_task_relationship(origin, destination)
+                elif node_type == "Airflow":
+                    await kafka_helper.create_dataset_task_relationship(origin, destination)
+                else:
+                    print("Unresolved")
+                
 # Usage
-table_lineage_creation("job:example:test_four_layer.l2_task_2")
+asyncio.run(table_lineage_creation("job:example:test_four_layer.l2_task_2"))
 # loop = asyncio.get_event_loop()
 # roots = loop.run_until_complete(lineage_creation_async_spark("test_four_layer", None, None))
