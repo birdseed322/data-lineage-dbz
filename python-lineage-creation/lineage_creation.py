@@ -31,7 +31,7 @@ def check_task_type(task_id):
     else:
         return "Unresolved"
     
-async def lineage_creation_async_spark(parent_dag_id, next_task_ids, wait_for_completion):
+async def lineage_creation_task(parent_dag_id, next_task_ids, wait_for_completion):
     roots = []
     await kafka_helper.create_dag_node(parent_dag_id)
     dag = requests.get(airflow_backend + "dags/" + parent_dag_id + "/tasks", headers={"Authorization" : "Basic " + base64.b64encode(str.encode(f'{airflow_user}:{airflow_password}')).decode('utf-8')}).json()    
@@ -54,7 +54,7 @@ async def lineage_creation_async_spark(parent_dag_id, next_task_ids, wait_for_co
             if not wait_for_completion_downstream:
                 for downstream_task in task["downstream_task_ids"]:
                     await kafka_helper.create_task_task_relationship(parent_dag_id + "." + task["task_id"], downstream_task)
-            downstream_roots = await lineage_creation_async_spark(target_dag_id, task["downstream_task_ids"], wait_for_completion_downstream)
+            downstream_roots = await lineage_creation_task(target_dag_id, task["downstream_task_ids"], wait_for_completion_downstream)
             for root in downstream_roots:
                 # print(parent_dag_id + "." + task["task_id"] + " to " + root+ " created")
                 await kafka_helper.create_task_task_relationship(parent_dag_id + "." + task["task_id"], root)
@@ -74,7 +74,7 @@ async def lineage_creation_async_spark(parent_dag_id, next_task_ids, wait_for_co
 
     return roots
 
-async def table_lineage_creation(node_id):
+async def lineage_creation_table(node_id):
     graph = requests.get(marquez_backend + "lineage?nodeId=" + node_id).json()["graph"]
     for node in graph:
         node_job_name = node["data"]["name"]
@@ -101,6 +101,6 @@ async def table_lineage_creation(node_id):
                     print("Unresolved")
                 
 # Usage
-asyncio.run(table_lineage_creation("job:example:test_four_layer.l2_task_2"))
+asyncio.run(lineage_creation_table("job:example:test_four_layer.l2_task_2"))
 # loop = asyncio.get_event_loop()
-# roots = loop.run_until_complete(lineage_creation_async_spark("test_four_layer", None, None))
+# roots = loop.run_until_complete(lineage_creation_task("test_four_layer", None, None))
