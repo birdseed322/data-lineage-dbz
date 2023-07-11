@@ -1,3 +1,28 @@
+Straight DAG (Single Master DAG):
+    - test_straight.py
+
+MiddleSplit (Root task splits into 2 tasks before joining at end task):
+    - test_middle_split.py
+
+Wait (Master DAG triggers child dag which triggers a secondary child DAG. Each DAG waits for child DAG to complete):
+    - test_wait.py
+    - test_wait_target1.py
+    - test_wait_target2.py
+
+NoWait (Master DAG triggers child dag which triggers a secondary child DAG. Each DAG does not wait for child DAG to complete):
+    - test_no_wait.py
+    - test_no_wait_target1.py
+    - test_no_wait_target2.py
+
+2Roots2Child (DAG with 2 root tasks, each triggering a child DAG and waiting for child DAG to complete):
+    - test_two_roots_two_child_child1.py
+    - test_two_roots_two_child_child2.py
+    - test_two_roots_two_child.py
+
+2RootsDAG (A DAG with 2 root tasks, and another DAG which triggers the former DAG):
+    - test_two_roots_base.py
+    - test_two_roots_in_target.py
+
 2Postgres:
     - test_db_four.py
     - test_db_three.py
@@ -5,50 +30,10 @@
     - test_master_dag_db.py
     - test_two_postgres.py
 
-2Roots2Child:
-    - test_two_roots_two_child_child1.py
-    - test_two_roots_two_child_child2.py
-    - test_two_roots_two_child.py
-
-2RootsBase:
-    - test_two_roots_base.py
-
-2RootsTarget:
-    - test_two_roots_in_target_target.py
-    - test_two_roots_in_target.py
-
 4Layer:
     - test_four_layer.py
 
-MiddleSplit:
-    - test_middle_split.py
-
-NoWait:
-    - test_no_wait.py
-    - test_target1.py
-    - test_target2.py
-
-SparkSubmitTest:
+SparkSubmitTest (DAG to submit spark jobs):
     - test_spark_submit.py
 
-SplitEnd:
-    - test_split_end.py
-    - test_split_end_target.py
 
-Straight:
-    - test_straight.py
-
-Wait:
-    - test_wait.py
-    - test_wait_target1.py
-    - test_wait_target2.py
-
-TriggerDagRunOperator:
-    - controller.py
-    - target.py
-
-ExternalTaskSensor:
-    - dag_a.py
-    - dag_b.py
-    - dag_c.py
-    - waiting_a_b_c.py
