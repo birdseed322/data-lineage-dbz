@@ -6,39 +6,37 @@ from airflow.contrib.operators.spark_submit_operator import SparkSubmitOperator
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 
-spark_job_path = '/usr/local/spark/app/my_spark_job.py'
-complex_spark_job_path = '/usr/local/spark/app/complex_spark_job.py'
+simple_spark_job_path = "/usr/local/spark/app/simple_spark_job.py"
+complex_spark_job_path = "/usr/local/spark/app/complex_spark_job.py"
 spark_master = "spark://spark:7077"
 
 default_args = {
-    'owner': 'Test',
-    'depends_on_past': False,
-    'start_date': days_ago(1),
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'email': ['test@example.com']
+    "owner": "Test",
+    "depends_on_past": False,
+    "start_date": days_ago(1),
+    "email_on_failure": False,
+    "email_on_retry": False,
+    "email": ["test@example.com"],
 }
 
 with DAG(
-    'test_complex_spark_submit',
-    schedule_interval='*/1 * * * *',
+    "test_complex_spark_submit",
     catchup=False,
-    is_paused_upon_creation=False,
+    is_paused_upon_creation=True,
     max_active_runs=1,
     default_args=default_args,
-    description='DAG that triggers a complex SPARK job'
+    description="DAG that triggers a complex SPARK job",
 ) as dag:
-
 
     def start():
         print("start")
 
-    t1 = PythonOperator(task_id='start', python_callable=start)
-    
+    t1 = PythonOperator(task_id="start", python_callable=start)
+
     t2 = PostgresOperator(
-    task_id='create_tables',
-    postgres_conn_id='postgres_default',
-    sql='''
+        task_id="create_tables",
+        postgres_conn_id="postgres_default",
+        sql="""
     CREATE TABLE IF NOT EXISTS visits (
         user_id integer,
         visit_date date
@@ -92,24 +90,36 @@ with DAG(
         (109, 'Technology'),
         (110, 'Sports')
     ON CONFLICT DO NOTHING;
-    ''',
-    dag=dag
+    """,
+        dag=dag,
     )
 
-    t3 =  SparkSubmitOperator(application=spark_job_path, task_id="submit_job",
-                              name="my_spark_job", conn_id='spark_default',
-                              packages='io.openlineage:openlineage-spark:0.27.2',
-                              conf={"spark.openlineage.transport.url":"http://marquez:5000/api/v1/namespaces/example/",
-                                     "spark.openlineage.transport.type":"http",
-                                     "spark.extraListeners":"io.openlineage.spark.agent.OpenLineageSparkListener"})
+    t3 = SparkSubmitOperator(
+        application=simple_spark_job_path,
+        task_id="submit_simple_job",
+        name="simple_spark_job",
+        conn_id="spark_default",
+        packages="io.openlineage:openlineage-spark:0.27.2",
+        conf={
+            "spark.openlineage.transport.url": "http://marquez:5000/api/v1/namespaces/example/",
+            "spark.openlineage.transport.type": "http",
+            "spark.extraListeners": "io.openlineage.spark.agent.OpenLineageSparkListener",
+        },
+    )
 
-    t4 =  SparkSubmitOperator(application=complex_spark_job_path, task_id="submit_complex_job",
-                              name="complex_spark_job", conn_id='spark_default',
-                              packages='io.openlineage:openlineage-spark:0.27.2',
-                              jars ='/usr/local/spark/app/postgresql-42.6.0.jar',
-                              conf={"spark.openlineage.transport.url":"http://marquez:5000/api/v1/namespaces/example/",
-                                     "spark.openlineage.transport.type":"http",
-                                     "spark.extraListeners":"io.openlineage.spark.agent.OpenLineageSparkListener"})
+    t4 = SparkSubmitOperator(
+        application=complex_spark_job_path,
+        task_id="submit_complex_job",
+        name="complex_spark_job",
+        conn_id="spark_default",
+        packages="io.openlineage:openlineage-spark:0.27.2",
+        jars="/usr/local/spark/app/postgresql-42.6.0.jar",
+        conf={
+            "spark.openlineage.transport.url": "http://marquez:5000/api/v1/namespaces/example/",
+            "spark.openlineage.transport.type": "http",
+            "spark.extraListeners": "io.openlineage.spark.agent.OpenLineageSparkListener",
+        },
+    )
 
 
 t1 >> t2 >> t3 >> t4
