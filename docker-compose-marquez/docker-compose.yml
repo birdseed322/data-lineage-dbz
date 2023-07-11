@@ -144,6 +144,7 @@ services:
       - NEO4J_dbms.memory.heap.initial_size=1G
       - NEO4J_dbms_memory_heap_max__size=1G
       - NEO4J_AUTH=neo4j/password
+      - NEO4JLABS_PLUGINS=["apoc"]
   kafka:
     image: "bitnami/kafka:latest"
     restart: unless-stopped
