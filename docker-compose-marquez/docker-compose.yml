@@ -217,3 +217,7 @@ services:
       - ./sparkjobs:/usr/local/spark/app
     depends_on:
       - spark
+  neodash:
+    image: docker.io/neo4jlabs/neodash
+    ports:
+      - 5005:5005
