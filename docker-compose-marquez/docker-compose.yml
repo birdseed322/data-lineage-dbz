@@ -21,7 +21,7 @@ services:
       - AIRFLOW_LOAD_EXAMPLES=no
       - AIRFLOW_CONN_EXAMPLE_DB=postgres://example:example@postgres:5432/example
     volumes:
-      - ./airflow/dags:/opt/bitnami/airflow/dags
+      - ./airflow/dags/demo:/opt/bitnami/airflow/dags
       - ./airflow/airflow.cfg:/opt/bitnami/airflow/airflow.cfg
       - ./sparkjobs:/usr/local/spark/app
       # - /whl:/whl
@@ -44,7 +44,7 @@ services:
       - AIRFLOW_CONN_EXAMPLE_DB=postgres://example:example@postgres:5432/example
       - AIRFLOW_WEBSERVER_HOST=airflow
     volumes:
-      - ./airflow/dags:/opt/bitnami/airflow/dags
+      - ./airflow/dags/demo:/opt/bitnami/airflow/dags
       - ./airflow/airflow.cfg:/opt/bitnami/airflow/airflow.cfg
       - ./sparkjobs:/usr/local/spark/app
       # - /whl:/whl
@@ -68,7 +68,7 @@ services:
       - AIRFLOW_CONN_EXAMPLE_DB=postgres://example:example@postgres:5432/example
       - AIRFLOW_WEBSERVER_HOST=airflow
     volumes:
-      - ./airflow/dags:/opt/bitnami/airflow/dags
+      - ./airflow/dags/demo:/opt/bitnami/airflow/dags
       - ./airflow/airflow.cfg:/opt/bitnami/airflow/airflow.cfg
       - ./sparkjobs:/usr/local/spark/app
       # - /whl:/whl
@@ -218,3 +218,7 @@ services:
       - ./sparkjobs:/usr/local/spark/app
     depends_on:
       - spark
+  neodash:
+    image: docker.io/neo4jlabs/neodash
+    ports:
+      - 5005:5005

@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession
 
 # Create SparkSession
-spark = SparkSession.builder.appName("MySparkJob").getOrCreate()
+spark = SparkSession.builder.appName("SimpleSparkJob").getOrCreate()
 
 # Read locations to DataFrame and create a temporary view
 locations = (
@@ -21,7 +21,8 @@ user_favorites.createOrReplaceTempView("user_favorites")
 
 
 # Join user_favorites and locations, and generate the nicknames
-nicknames = spark.sql("""
+nicknames = spark.sql(
+    """
 SELECT
   user_favorites.id,
   CONCAT(
@@ -32,8 +33,11 @@ SELECT
 FROM user_favorites
 JOIN locations
 ON user_favorites.favorite_city = locations.city
-""")
+"""
+)
 
 # Write output and print final DataFrame to console
-nicknames.write.mode("overwrite").csv("file:///usr/local/spark/app/output/nicknames")
+nicknames.write.mode("overwrite").csv(
+    "file:///usr/local/spark/app/output/nicknames.csv"
+)
 nicknames.show(20, False)
