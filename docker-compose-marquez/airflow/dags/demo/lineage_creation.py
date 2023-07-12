@@ -16,6 +16,7 @@ kafka_server = "kafka:9094"
 kafka_topic = "test"
 
 
+# Sets up the Kafka queue to publish to Neo4j.
 def setup_kafka_connect():
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     payload = {
@@ -48,6 +49,7 @@ def setup_kafka_connect():
         print("Error when setting connector: " + str(err))
 
 
+# Publishes a message to the Kafka queue to create a DAG node.
 async def create_dag_node(dagId, producer):
     try:
         print("SENDING CREATEDAG MESSAGE TO Q")
@@ -69,6 +71,8 @@ async def create_dag_node(dagId, producer):
         print(f"Error when creating: {dagId} Error message: {err}")
 
 
+# Publishes a message to Kafka queue to create a relationship
+# from a DAG node to an Airflow task node.
 async def create_dag_task_relationship(dag_id, task_id, producer):
     try:
         print("SENDING CREATEDAGTASKRS MESSAGE TO Q")
@@ -97,6 +101,8 @@ async def create_dag_task_relationship(dag_id, task_id, producer):
         )
 
 
+# Publishes a message to Kafka Queue to create a relationship
+# from a DAG node to another DAG node.
 async def create_dag_dag_relationship(dag_id_1, dag_id_2, producer):
     try:
         print("SENDING CREATEDAGDAG MESSAGE TO Q")
@@ -128,6 +134,8 @@ async def create_dag_dag_relationship(dag_id_1, dag_id_2, producer):
         )
 
 
+# Publishes a message to Kafka Queue to create a relationship
+# from an Airflow task node to another task node.
 async def create_task_task_relationship(task_id_1, task_id_2, producer):
     try:
         print("SENDING CREATEDAGDAG MESSAGE TO Q")
@@ -159,6 +167,7 @@ async def create_task_task_relationship(task_id_1, task_id_2, producer):
         )
 
 
+# Publishes message to Kafka queue to create a Spark job node.
 async def create_spark_job_node(spark_job_id, producer):
     try:
         print("SENDING CREATESPARKJOB MESSAGE TO Q")
@@ -177,6 +186,8 @@ async def create_spark_job_node(spark_job_id, producer):
         print("Error when creating: " + spark_job_id + " Error message: " + err)
 
 
+# Publishes a message to Kafka queue to create a relationship
+# from an Airflow task node to a Spark job node.
 async def create_task_spark_job_relationship(task_id, spark_job_id, producer):
     try:
         print("SENDING CREATETASKSPARKJOBRS MESSAGE TO Q")
@@ -208,6 +219,8 @@ async def create_task_spark_job_relationship(task_id, spark_job_id, producer):
         )
 
 
+# Publishes a message to Kafka queue to create a relationship
+# from a Spark job node to a Spark task node.
 async def create_spark_job_spark_task_relationship(
     parent_spark_job_id, spark_task_id, producer
 ):
@@ -241,6 +254,8 @@ async def create_spark_job_spark_task_relationship(
         )
 
 
+# Publishes a message to Kafka queue to create a relationship
+# from a dataset node to a Spark task node.
 async def create_dataset_spark_task_relationship(dataset_id, spark_task_id, producer):
     try:
         print("SENDING CREATEDATASETTOSPARKTASKRS MESSAGE TO Q")
@@ -272,6 +287,8 @@ async def create_dataset_spark_task_relationship(dataset_id, spark_task_id, prod
         )
 
 
+# Publishes a message to Kafka queue to create a relationship
+# from a Spark task node to a dataset node.
 async def create_spark_task_dataset_relationship(spark_task_id, dataset_id, producer):
     try:
         print("SENDING CREATESPARKTASKDATASETRS MESSAGE TO Q")
@@ -303,6 +320,8 @@ async def create_spark_task_dataset_relationship(spark_task_id, dataset_id, prod
         )
 
 
+# Publishes a message to Kafka queue to create a relationship
+# from a dataset node to an Airflow task node.
 async def create_dataset_task_relationship(dataset_id, task_id, producer):
     try:
         print("SENDING CREATEDATASETTOTASKRS MESSAGE TO Q")
@@ -334,6 +353,8 @@ async def create_dataset_task_relationship(dataset_id, task_id, producer):
         )
 
 
+# Publishes a message to Kafka Queue to create a relationship
+# from an Airflow task node to a dataset node.
 async def create_task_dataset_relationship(task_id, dataset_id, producer):
     try:
         print("SENDING CREATESPARKTASKDATASETRS MESSAGE TO Q")
@@ -371,6 +392,7 @@ def extract_job_name(input_string):
     return job_name
 
 
+# Checks whether a task node is a Spark task or an Airflow task
 def check_task_type(task_id):
     task = requests.get(marquez_backend + "namespaces/example/jobs/" + task_id).json()
     facets = task["latestRun"]["facets"]
@@ -382,6 +404,7 @@ def check_task_type(task_id):
         return "Unresolved"
 
 
+# Authentication for Airflow
 headers = {
     "Authorization": "Basic "
     + base64.b64encode(str.encode(f"{airflow_user}:{airflow_password}")).decode(
@@ -400,42 +423,58 @@ default_args = {
     "provide_context": True,
 }
 
+dag_md = """
+### Lineage Creation Tool for Airflow DAGs and Spark Jobs
+This is a Lineage Creation Tool in the form of an Airflow DAG, to create lineages between Airflow tasks,
+Spark Jobs and datasets and display them on (PowerBI) via Neo4j, a graph database.
+
+#### Purpose
+To utilise this tool, ensure that the DAGs which you wish to see the lineages for has been run at least once
+for the metadata to be produced by Airflow. The results will be published on a business viewing frontend. 
+
+#### Notes
+- To see the codebase, you can visit the [Github Repository](https://github.com/birdseed322/data-lineage-dbz/tree/main)
+"""
+
 with DAG(
     "lineage_creation",
     catchup=False,
     is_paused_upon_creation=True,
     max_active_runs=1,
     default_args=default_args,
+    doc_md=dag_md,
     description="DAG that generates lineage creation of all other DAGs in Neo4j.",
 ) as dag:
 
     def task_lineage(**context):
         try:
+            # Set up Kafka Queue
             setup_kafka_connect()
             producer = KafkaProducer(
                 bootstrap_servers=[kafka_server],
                 client_id="quickstart--shared-admin",
                 value_serializer=lambda v: bytes(json.dumps(v).encode("utf-8")),
             )
-            dictionary_task = {}
+            # Initialise Dictionary to track which DAGs have lineages been created for
+            dictionary_dag = {}
             response = requests.get(f"{airflow_backend}dags", headers=headers)
             data = response.json()
             for dag in data["dags"]:
                 if not dag["dag_id"] == "lineage_creation":
                     key = dag["dag_id"]
-                    dictionary_task[key] = False
-            context["ti"].xcom_push(key="dictionary_task", value=dictionary_task)
-            for key in dictionary_task:
-                if dictionary_task[key] == False:
-                    print("Go through function")
+                    dictionary_dag[key] = False
+            context["ti"].xcom_push(key="dictionary_dag", value=dictionary_dag)
+            for key in dictionary_dag:
+                if dictionary_dag[key] == False:
+                    print(f"Create lineage for DAG {key}")
                     loop = asyncio.get_event_loop()
                     loop.run_until_complete(
-                        lineage_creation_task(key, None, None, producer, **context)
+                        lineage_creation_dag(key, None, None, producer, **context)
                     )
                 else:
-                    print(f"skipped DAG {key}")
-                dictionary_task = context["ti"].xcom_pull(key="dictionary_task")
-                print(dictionary_task)
+                    print(f"Skipped lineage creation for DAG {key}")
+                dictionary_dag = context["ti"].xcom_pull(key="dictionary_dag")
+                print(dictionary_dag)
         except requests.exceptions.RequestException as err:
             print("Error occurred during DAGs retrieval:", err)
 
@@ -471,20 +510,23 @@ with DAG(
                         lineage_creation_table(key, producer, **context)
                     )
                 else:
-                    print("Skipped node id: " + key)
+                    print(f"Skipped node ID: {key}")
                 dictionary_table = context["ti"].xcom_pull(key="dictionary_table")
                 print(dictionary_table)
         except:
             print("failed")
 
-    async def lineage_creation_task(
+    # Creates lineage in Neo4j for a particular DAG and children DAGs / Spark Jobs that it triggers
+    async def lineage_creation_dag(
         parent_dag_id, next_task_ids, wait_for_completion, producer, **context
     ):
-        dictionary_task = context["ti"].xcom_pull(key="dictionary_task")
-        dictionary_task[parent_dag_id] = True
-        context["ti"].xcom_push(key="dictionary_task", value=dictionary_task)
+        # Mark DAG in dictionary_dag to indicate lineage has been created.
+        dictionary_dag = context["ti"].xcom_pull(key="dictionary_dag")
+        dictionary_dag[parent_dag_id] = True
+        context["ti"].xcom_push(key="dictionary_dag", value=dictionary_dag)
         roots = []
         await create_dag_node(parent_dag_id, producer)
+        # Call Airflow API to get all tasks within the DAG
         dag = requests.get(
             airflow_backend + "dags/" + parent_dag_id + "/tasks",
             headers={
@@ -494,6 +536,8 @@ with DAG(
                 ).decode("utf-8")
             },
         ).json()
+
+        # Create dependencies between tasks in a DAG
         for task in dag["tasks"]:
             task["downstream_task_ids"] = [
                 parent_dag_id + "." + x for x in task["downstream_task_ids"]
@@ -509,6 +553,7 @@ with DAG(
                         parent_dag_id + "." + task["task_id"], next_task_id, producer
                     )
 
+        # Find root tasks of a DAG
         for task in dag["tasks"]:
             task_details = requests.get(
                 marquez_backend
@@ -526,7 +571,8 @@ with DAG(
                 == 2
             ):
                 roots.append(parent_dag_id + "." + task["task_id"])
-            # Handle TriggerDagRunOperator
+
+            # Handle scenario where task triggers another DAG
             if task["operator_name"] == "TriggerDagRunOperator":
                 wait_for_completion_downstream = task_details["latestRun"]["facets"][
                     "airflow"
@@ -544,7 +590,7 @@ with DAG(
                             downstream_task,
                             producer,
                         )
-                downstream_roots = await lineage_creation_task(
+                downstream_roots = await lineage_creation_dag(
                     target_dag_id,
                     task["downstream_task_ids"],
                     wait_for_completion_downstream,
@@ -552,11 +598,11 @@ with DAG(
                     **context,
                 )
                 for root in downstream_roots:
-                    # print(parent_dag_id + "." + task["task_id"] + " to " + root+ " created")
                     await create_task_task_relationship(
                         parent_dag_id + "." + task["task_id"], root, producer
                     )
-            # Handle SparkSubmitOperator
+
+            # Handles scenario where tasks calls a Spark Job
             elif task["operator_name"] == "SparkSubmitOperator":
                 spark_job_name = task_details["latestRun"]["facets"]["airflow"]["task"][
                     "_name"
@@ -584,6 +630,7 @@ with DAG(
 
         return roots
 
+    # Creates table-level lineage for a particular node
     async def lineage_creation_table(node_id, producer, **context):
         dictionary_table = context["ti"].xcom_pull(key="dictionary_table")
         dictionary_table[node_id] = True
@@ -629,9 +676,29 @@ with DAG(
         except:
             print("Invalid node")
 
-    task_lineage = PythonOperator(task_id="task_lineage", python_callable=task_lineage)
+    task_lineage_md = """
+    ### Task-Level lineage creation 
+
+    #### Purpose
+    This task generates the lineages for a particular DAG and it's tasks, as well as all the other children DAGs 
+    that it triggers in a recursive manner.
+    It can also generate lineages for spark jobs if it has been submitted within the DAG.
+    """
+    table_lineage_md = """
+    ### Table-Level lineage creation 
+
+    #### Purpose
+    This task generates the lineages for a particular task and it's datasets.
+    It can also generate table-level lineages for spark jobs if it has been submitted within the DAG.
+
+    #### Notes
+    This task is ran after generating the task-level lineages, so that the nodes for the respective tasks are created first.
+    """
+    task_lineage = PythonOperator(
+        task_id="task_lineage", python_callable=task_lineage, doc_md=task_lineage_md
+    )
     table_lineage = PythonOperator(
-        task_id="table_lineage", python_callable=table_lineage
+        task_id="table_lineage", python_callable=table_lineage, doc_md=table_lineage_md
     )
 
     task_lineage >> table_lineage
