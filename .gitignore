@@ -4,6 +4,7 @@ docker-compose-dbz/neo4j-server/data/
 docker-compose-dbz/neo4j-server/logs/
 docker-compose-dbz/kafka/kafka/
 docker-compose-dbz/airflow/dags/__pycache__/
+docker-compose-dbz/airflow/dags/demo/__pycache__
 restAPI/csv/
 docker-compose-dbz/neo4j-server/import/
 docker-compose-dbz/sparkjobs/output/
