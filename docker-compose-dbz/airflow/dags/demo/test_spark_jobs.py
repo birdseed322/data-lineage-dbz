@@ -20,7 +20,7 @@ default_args = {
 }
 
 with DAG(
-    "test_complex_spark_submit",
+    "test_spark_jobs",
     catchup=False,
     is_paused_upon_creation=True,
     max_active_runs=1,
