@@ -4,11 +4,10 @@ docker-compose-dbz/neo4j-server/data/
 docker-compose-dbz/neo4j-server/logs/
 docker-compose-dbz/kafka/kafka/
 docker-compose-dbz/airflow/dags/__pycache__/
-docker-compose-dbz/airflow/dags/demo/__pycache__
+docker-compose-dbz/airflow/dags/demo/__pycache__/
 restAPI/csv/
 docker-compose-dbz/neo4j-server/import/
 docker-compose-dbz/sparkjobs/output/
 docker-compose-dbz/sparkjobs/metastore_db/
 docker-compose-dbz/dags/__pycache__
 docker-compose-dbz/import/
-python-lineage-creation/helper_functions/__pycache__
