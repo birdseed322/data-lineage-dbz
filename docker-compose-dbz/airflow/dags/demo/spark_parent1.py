@@ -33,6 +33,7 @@ with DAG(
 
     t1 = PythonOperator(task_id="start", python_callable=start)
 
+# t2 Creates the necessary tables for the upcoming Spark jobs
     t2 = PostgresOperator(
         task_id="create_tables",
         postgres_conn_id="postgres_default",
@@ -106,6 +107,12 @@ with DAG(
             "spark.extraListeners": "io.openlineage.spark.agent.OpenLineageSparkListener",
         },
     )
+    '''
+    SELECT user_favorites.id, CONCAT(favorite_color, ' ', state) AS nickname
+    FROM user_favorites
+    JOIN locations
+    ON user_favorites.favorite_city = locations.city
+    '''
 
     t4 = SparkSubmitOperator(
         application=complex_spark_job_path,
@@ -120,6 +127,20 @@ with DAG(
             "spark.extraListeners": "io.openlineage.spark.agent.OpenLineageSparkListener",
         },
     )
+    '''
+    SELECT user_id, COUNT(*) AS num_visits
+    FROM visits
+    WHERE visit_date BETWEEN '2023-01-01' AND '2023-12-31'
+    GROUP BY user_id
+    LIMIT 10;
 
+    SELECT page_views.page_id, AVG(duration) AS avg_duration
+    FROM page_views
+    JOIN page_categories ON page_views.page_id = page_categories.page_id
+    WHERE page_categories.category = 'Technology'
+    GROUP BY page_views.page_id
+    ORDER BY avg_duration DESC
+    LIMIT 10    
+    '''
 
 t1 >> t2 >> t3 >> t4

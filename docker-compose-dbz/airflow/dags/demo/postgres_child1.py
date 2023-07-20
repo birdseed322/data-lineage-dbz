@@ -18,7 +18,7 @@ dag = DAG(
     is_paused_upon_creation=False,
     max_active_runs=1,
     default_args=default_args,
-    description='DAG that has 2 jobs that pulls from postgres.'
+    description='DAG that has 4 jobs that pulls from postgres.'
 )
 
 t1 = PostgresOperator(
@@ -37,7 +37,8 @@ t2 = PostgresOperator(
     sql='''
     CREATE TABLE IF NOT EXISTS db_three (
       value INTEGER
-    );''',
+    );
+    ''',
     dag=dag
 )
 
@@ -46,7 +47,7 @@ t3 = PostgresOperator(
     postgres_conn_id='postgres_default',
     sql='''
     INSERT INTO db_three (value)
-        SELECT SUM(c.value) FROM db_one AS c;
+        SELECT SUM(c.value) FROM db_two AS c;
     ''',
     dag=dag
 )
