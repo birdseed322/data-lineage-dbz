@@ -63,11 +63,11 @@ with DAG(
         dag=dag
     )
 
-    trigger_1 = TriggerDagRunOperator(
+    trigger_child = TriggerDagRunOperator(
         task_id='test_trigger_child',
         trigger_dag_id='postgres_child1',
         wait_for_completion=True
     )
 
-    create_db_1 >> create_db_2 >> insert_db_1 >> insert_db_2 >> trigger_1
+    create_db_1 >> create_db_2 >> insert_db_1 >> insert_db_2 >> trigger_child
 
