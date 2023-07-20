@@ -11,3 +11,4 @@ docker-compose-dbz/sparkjobs/output/
 docker-compose-dbz/sparkjobs/metastore_db/
 docker-compose-dbz/dags/__pycache__
 docker-compose-dbz/import/
+python-lineage-creation/helper_functions/__pycache__

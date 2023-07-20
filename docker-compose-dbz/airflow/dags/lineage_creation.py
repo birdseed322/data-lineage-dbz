@@ -550,7 +550,7 @@ with DAG(
                     wait_for_completion_downstream,
                     producer,
                     **context,
-                )
+                )   
                 for root in downstream_roots:
                     # print(parent_dag_id + "." + task["task_id"] + " to " + root+ " created")
                     await create_task_task_relationship(

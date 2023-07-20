@@ -12,7 +12,7 @@ default_args = {
 }
 
 dag = DAG(
-    'test_postgres_child',
+    'postgres_child1',
     schedule_interval='*/2 * * * *',
     catchup=False,
     is_paused_upon_creation=False,

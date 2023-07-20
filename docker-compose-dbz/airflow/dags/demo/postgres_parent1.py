@@ -13,7 +13,7 @@ default_args = {
 }
 
 with DAG(
-    "test_postgres_parent",
+    "postgres_parent1",
     catchup=False,
     is_paused_upon_creation=True,
     max_active_runs=1,
@@ -26,11 +26,8 @@ with DAG(
         postgres_conn_id='postgres_default',
         sql='''
         CREATE TABLE IF NOT EXISTS db_one (
-        value INTEGER
+            value INTEGER
         );
-        INSERT INTO db_one (value)
-        VALUES (1)
-        ON CONFLICT DO NOTHING;
          ''',
         dag=dag
     )
@@ -40,20 +37,37 @@ with DAG(
         postgres_conn_id='postgres_default',
         sql='''
         CREATE TABLE IF NOT EXISTS db_two (
-        value INTEGER
+            value INTEGER
         );
+         ''',
+        dag=dag
+    )
+    
+    insert_db_1 = PostgresOperator(
+        task_id='insert_into_one',
+        postgres_conn_id='postgres_default',
+        sql='''
+        INSERT INTO db_one (value)
+            VALUES (1);
+         ''',
+        dag=dag
+    )
+    
+    insert_db_2 = PostgresOperator(
+        task_id='insert_into_two',
+        postgres_conn_id='postgres_default',
+        sql='''
         INSERT INTO db_two (value)
-        VALUES (2)
-        ON CONFLICT DO NOTHING;
+            VALUES (2);
          ''',
         dag=dag
     )
 
     trigger_1 = TriggerDagRunOperator(
         task_id='test_trigger_child',
-        trigger_dag_id='test_postgres_child',
+        trigger_dag_id='postgres_child1',
         wait_for_completion=True
     )
 
-    create_db_1 >> create_db_2 >> trigger_1
+    create_db_1 >> create_db_2 >> insert_db_1 >> insert_db_2 >> trigger_1
 

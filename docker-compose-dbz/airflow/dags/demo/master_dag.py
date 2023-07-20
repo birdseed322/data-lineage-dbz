@@ -13,7 +13,7 @@ default_args = {
 }
 
 with DAG(
-    "demo_dag",
+    "master_dag",
     catchup=False,
     is_paused_upon_creation=True,
     max_active_runs=1,
@@ -27,13 +27,13 @@ with DAG(
 
     t2 = TriggerDagRunOperator(
         task_id="trigger_spark_jobs",
-        trigger_dag_id="test_spark_jobs",
-        wait_for_completion=False,
+        trigger_dag_id="spark_parent1",
+        wait_for_completion=True,
     )
 
     t3 = TriggerDagRunOperator(
         task_id="trigger_postgres",
-        trigger_dag_id="test_postgres_parent",
+        trigger_dag_id="postgres_parent1",
         wait_for_completion=True,
     )
 
