@@ -1,4 +1,4 @@
-data-lineage-dbz is an open source project that provides 
+data-lineage-dbz is a data lineage engine that leverages on open-source technologies to provide a visualisation of task level and table level lineages for Airflow DAGs and Spark Jobs.
 
 ## Quickstart
 INSERT QUICKSTART GUIDE HERE + ADD LINK TO API docs
