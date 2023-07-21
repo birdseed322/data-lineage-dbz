@@ -28,7 +28,7 @@ with DAG(
     t2 = TriggerDagRunOperator(
         task_id="trigger_spark_jobs",
         trigger_dag_id="spark_parent1",
-        wait_for_completion=True,
+        wait_for_completion=False,
     )
 
     t3 = TriggerDagRunOperator(
