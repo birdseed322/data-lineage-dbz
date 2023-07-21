@@ -97,7 +97,7 @@ with DAG(
 
     t3 = SparkSubmitOperator(
         application=simple_spark_job_path,
-        task_id="submit_simple_job",
+        task_id="submit_spark_job",
         name="simple_spark_job",
         conn_id="spark_default",
         packages="io.openlineage:openlineage-spark:0.27.2",
@@ -114,33 +114,4 @@ with DAG(
     ON user_favorites.favorite_city = locations.city
     '''
 
-    t4 = SparkSubmitOperator(
-        application=complex_spark_job_path,
-        task_id="submit_complex_job",
-        name="complex_spark_job",
-        conn_id="spark_default",
-        packages="io.openlineage:openlineage-spark:0.27.2",
-        jars="/usr/local/spark/app/postgresql-42.6.0.jar",
-        conf={
-            "spark.openlineage.transport.url": "http://marquez:5000/api/v1/namespaces/example/",
-            "spark.openlineage.transport.type": "http",
-            "spark.extraListeners": "io.openlineage.spark.agent.OpenLineageSparkListener",
-        },
-    )
-    '''
-    SELECT user_id, COUNT(*) AS num_visits
-    FROM visits
-    WHERE visit_date BETWEEN '2023-01-01' AND '2023-12-31'
-    GROUP BY user_id
-    LIMIT 10;
-
-    SELECT page_views.page_id, AVG(duration) AS avg_duration
-    FROM page_views
-    JOIN page_categories ON page_views.page_id = page_categories.page_id
-    WHERE page_categories.category = 'Technology'
-    GROUP BY page_views.page_id
-    ORDER BY avg_duration DESC
-    LIMIT 10    
-    '''
-
-t1 >> t2 >> t3 >> t4
+t1 >> t2 >> t3
