@@ -1,14 +1,7 @@
-data-lineage-dbz is a data lineage engine that leverages on open-source technologies to provide a visualisation of task level and table level lineages for Airflow DAGs and Spark Jobs.
+Data-lineage-dbz is a data lineage engine that leverages on open-source technologies to provide a visualisation of task level and table level lineages for Airflow DAGs and Spark Jobs within a data ecosystem.
 
-## Quickstart
-INSERT QUICKSTART GUIDE HERE + ADD LINK TO API docs
+It leverages upon the OpenLineage standard of metadata produced by producers to capture and visualise lineage information on the graph database Neo4j.
 
-## Documentation
-LINK TO DOCS
+![Alt text](./docs/diagrams/neo4j-visual.jpg)
 
-## Software requirements
-INSERT SOFTWARE REQUIREMENTS HERE + ADD LINK TO DOCS SOFTWAREREQUIREMENTS.md
-
-## Modules
-INSERT DIFF MODULES HERE
-
+(screenshot of neo4j)
